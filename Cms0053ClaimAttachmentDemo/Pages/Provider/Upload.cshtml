@@ -1,0 +1,110 @@
+@page "/Provider/Upload/{token}"
+@model Cms0053ClaimAttachmentDemo.Pages.Provider.UploadModel
+@{
+    ViewData["Title"] = "Secure Document Upload";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="text-center mb-4">
+            <h1 class="h2 fw-bold">Secure Document Upload</h1>
+            <p class="text-muted">
+                You have received a request for clinical documentation.
+                Please upload the requested document below.
+            </p>
+        </div>
+
+        @if (Model.AttachReq.Status == "Fulfilled")
+        {
+            <div class="alert alert-info text-center">
+                <strong>This request has already been fulfilled.</strong>
+                The document was previously submitted. No further action is needed.
+            </div>
+        }
+        else
+        {
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white fw-semibold">
+                    Document Requested
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <dl class="mb-0">
+                                <dt>Document Type</dt>
+                                <dd class="fw-semibold">@Model.AttachReq.DocumentTypeRequested</dd>
+                                <dt>Reason for Request</dt>
+                                <dd>@Model.AttachReq.RequestReason</dd>
+                                <dt>Response Due By</dt>
+                                <dd>@Model.AttachReq.DueDate.ToLocalTime().ToString("MM/dd/yyyy")</dd>
+                            </dl>
+                        </div>
+                        <div class="col-sm-6">
+                            <dl class="mb-0">
+                                <dt>Patient</dt>
+                                <dd>@Model.AttachReq.Claim.PatientName</dd>
+                                <dt>Date of Birth</dt>
+                                <dd>@Model.AttachReq.Claim.PatientDOB.ToString("MM/dd/yyyy")</dd>
+                                <dt>Service Date</dt>
+                                <dd>@Model.AttachReq.Claim.ServiceDate.ToString("MM/dd/yyyy")</dd>
+                                <dt>Provider NPI</dt>
+                                <dd class="font-monospace">@Model.AttachReq.Claim.ProviderNPI</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header fw-semibold">Upload Document</div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.File" class="form-label fw-semibold">
+                                Document File <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Input.File" type="file" class="form-control"
+                                   accept=".pdf,.jpg,.jpeg,.png,.tiff,.tif,.txt" />
+                            <div class="form-text">
+                                Accepted: PDF, JPEG, PNG, TIFF, plain text. Maximum 10 MB.
+                            </div>
+                            <span asp-validation-for="Input.File" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.SubmittedBy" class="form-label fw-semibold">
+                                Submitted By <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Input.SubmittedBy" class="form-control"
+                                   placeholder="Your name or practice name" />
+                            <span asp-validation-for="Input.SubmittedBy" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.Notes" class="form-label fw-semibold">Notes (optional)</label>
+                            <textarea asp-for="Input.Notes" class="form-control" rows="2"
+                                      placeholder="Any additional context for the payer..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            Submit Document
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-muted text-center small mt-3">
+                Tracking: <span class="font-monospace">@Model.AttachReq.TrackingNumber</span>
+                &mdash; Demo Only. No real PHI.
+            </p>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

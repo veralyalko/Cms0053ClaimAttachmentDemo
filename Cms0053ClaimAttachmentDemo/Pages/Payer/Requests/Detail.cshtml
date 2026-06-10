@@ -1,0 +1,192 @@
+@page "{id:int}"
+@model Cms0053ClaimAttachmentDemo.Pages.Payer.Requests.DetailModel
+@using Cms0053ClaimAttachmentDemo.Models
+@{
+    ViewData["Title"] = "Attachment Request " + Model.AttachReq.TrackingNumber;
+    var uploadUrl = Url.Page("/Provider/Upload", new { token = Model.AttachReq.SecureUploadToken });
+    var absoluteUploadUrl = $"{Request.Scheme}://{Request.Host}{uploadUrl}";
+    var isFulfilled = Model.AttachReq.Status == AttachmentRequestStatus.Fulfilled;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">Attachment Request</h1>
+        <p class="text-muted mb-0">Tracking: <strong>@Model.AttachReq.TrackingNumber</strong></p>
+    </div>
+    <a asp-page="Index" class="btn btn-outline-secondary">All Requests</a>
+</div>
+
+@if (isFulfilled)
+{
+    <div class="alert alert-success mb-4">
+        <strong>Fulfilled.</strong> The provider has submitted the requested document.
+        See the <a href="#submitted-docs" class="alert-link">submitted document</a> below.
+    </div>
+}
+else
+{
+    <div class="alert alert-warning mb-4">
+        <strong>Awaiting provider response.</strong>
+        Share the secure upload link below with the provider.
+        In a production system this link would be delivered via X12 277.
+    </div>
+}
+
+<div class="card border-primary mb-4">
+    <div class="card-header bg-primary text-white fw-semibold">
+        Provider Secure Upload Link
+    </div>
+    <div class="card-body">
+        <p class="text-muted small mb-2">
+            Share this link with the provider. They can upload the requested document directly without logging in.
+        </p>
+        <div class="input-group">
+            <input type="text" id="uploadLink" class="form-control font-monospace"
+                   value="@absoluteUploadUrl" readonly />
+            <button class="btn btn-outline-primary" type="button"
+                    onclick="navigator.clipboard.writeText(document.getElementById('uploadLink').value); this.textContent='Copied!'">
+                Copy
+            </button>
+        </div>
+        <div class="mt-3">
+            <a href="@uploadUrl" class="btn btn-primary" target="_blank">
+                Open Upload Page (simulate provider)
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">Request Details</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Tracking Number</dt>
+                    <dd class="col-sm-7 font-monospace">@Model.AttachReq.TrackingNumber</dd>
+
+                    <dt class="col-sm-5">Document Requested</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.DocumentTypeRequested</dd>
+
+                    <dt class="col-sm-5">Reason</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.RequestReason</dd>
+
+                    <dt class="col-sm-5">Provider Email</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.ProviderEmail</dd>
+
+                    <dt class="col-sm-5">Requested At</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.RequestedAt.ToLocalTime().ToString("MM/dd/yyyy h:mm tt")</dd>
+
+                    <dt class="col-sm-5">Due By</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.DueDate.ToLocalTime().ToString("MM/dd/yyyy")</dd>
+
+                    <dt class="col-sm-5">Status</dt>
+                    <dd class="col-sm-7">
+                        @{
+                            var reqBadge = Model.AttachReq.Status switch
+                            {
+                                AttachmentRequestStatus.Fulfilled  => "bg-success",
+                                AttachmentRequestStatus.Expired    => "bg-secondary",
+                                AttachmentRequestStatus.Cancelled  => "bg-danger",
+                                _                                  => "bg-warning text-dark"
+                            };
+                        }
+                        <span class="badge @reqBadge">@Model.AttachReq.Status</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">Associated Claim</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Claim Number</dt>
+                    <dd class="col-sm-7 fw-semibold">@Model.AttachReq.Claim.ClaimNumber</dd>
+
+                    <dt class="col-sm-5">Patient</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.Claim.PatientName</dd>
+
+                    <dt class="col-sm-5">Date of Birth</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.Claim.PatientDOB.ToString("MM/dd/yyyy")</dd>
+
+                    <dt class="col-sm-5">Provider</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.Claim.ProviderName</dd>
+
+                    <dt class="col-sm-5">Provider NPI</dt>
+                    <dd class="col-sm-7 font-monospace">@Model.AttachReq.Claim.ProviderNPI</dd>
+
+                    <dt class="col-sm-5">Service Date</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.Claim.ServiceDate.ToString("MM/dd/yyyy")</dd>
+
+                    <dt class="col-sm-5">Diagnosis</dt>
+                    <dd class="col-sm-7">@Model.AttachReq.Claim.DiagnosisCode</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4" id="submitted-docs">
+    <div class="card-header fw-semibold">
+        Submitted Documents
+        @if (Model.SubmittedAttachments.Any())
+        {
+            <span class="badge bg-success ms-2">@Model.SubmittedAttachments.Count received</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary ms-2">None yet</span>
+        }
+    </div>
+    @if (!Model.SubmittedAttachments.Any())
+    {
+        <div class="card-body text-muted">
+            No documents submitted yet. Share the upload link above with the provider.
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Filename</th>
+                        <th>Document Type</th>
+                        <th>Submitted By</th>
+                        <th>Submitted At</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var att in Model.SubmittedAttachments)
+                    {
+                        var attBadge = att.Status switch
+                        {
+                            AttachmentStatus.Accepted         => "bg-success",
+                            AttachmentStatus.ValidationFailed => "bg-danger",
+                            AttachmentStatus.MatchFailed      => "bg-warning text-dark",
+                            _                                 => "bg-secondary"
+                        };
+                        <tr>
+                            <td class="text-muted small">@att.Id</td>
+                            <td>@att.FileName</td>
+                            <td>@att.DocumentType</td>
+                            <td>@att.SubmittedBy</td>
+                            <td class="small">@att.SubmittedAt.ToString("MM/dd/yyyy HH:mm") UTC</td>
+                            <td><span class="badge @attBadge">@att.Status</span></td>
+                            <td>
+                                <a asp-page="/Payer/Attachments/Detail" asp-route-id="@att.Id"
+                                   class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

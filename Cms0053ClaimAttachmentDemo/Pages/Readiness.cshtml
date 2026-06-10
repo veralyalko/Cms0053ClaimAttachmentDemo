@@ -1,0 +1,117 @@
+@page
+@model Cms0053ClaimAttachmentDemo.Pages.ReadinessModel
+@{
+    ViewData["Title"] = "CMS-0053 Readiness";
+}
+
+<div class="mb-4">
+    <h1 class="h2 fw-bold">CMS-0053 Readiness Checklist</h1>
+    <p class="text-muted">Standards alignment and X12 integration points for this prototype.</p>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark fw-bold">Prototype vs Production</div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Area</th>
+                            <th>This Prototype</th>
+                            <th>Production Requirement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Attachment submission</td>
+                            <td><span class="badge bg-secondary">HTML form upload</span></td>
+                            <td>X12 275 Transaction Set over AS2/SFTP or REST</td>
+                        </tr>
+                        <tr>
+                            <td>Payer information request</td>
+                            <td><span class="badge bg-secondary">DB record + demo URL</span></td>
+                            <td>X12 277 transmitted to provider/clearinghouse</td>
+                        </tr>
+                        <tr>
+                            <td>Claim linkage</td>
+                            <td><span class="badge bg-secondary">Name + NPI + date match</span></td>
+                            <td>X12 837 Internal Control Number (ICN)</td>
+                        </tr>
+                        <tr>
+                            <td>Clearinghouse integration</td>
+                            <td><span class="badge bg-secondary">Mock DB table</span></td>
+                            <td>Real clearinghouse API (Availity, Change Healthcare)</td>
+                        </tr>
+                        <tr>
+                            <td>EMR integration</td>
+                            <td><span class="badge bg-secondary">Seeded fake documents</span></td>
+                            <td>FHIR R4 DocumentReference or HL7 CDA</td>
+                        </tr>
+                        <tr>
+                            <td>Authentication</td>
+                            <td><span class="badge bg-secondary">None</span></td>
+                            <td>OAuth 2.0 / SMART on FHIR for provider portal</td>
+                        </tr>
+                        <tr>
+                            <td>File storage</td>
+                            <td><span class="badge bg-secondary">Local wwwroot/uploads/</span></td>
+                            <td>Encrypted cloud object storage (S3, Azure Blob)</td>
+                        </tr>
+                        <tr>
+                            <td>PHI handling</td>
+                            <td><span class="badge bg-secondary">Fake data only</span></td>
+                            <td>Full HIPAA compliance, encryption at rest and in transit</td>
+                        </tr>
+                        <tr>
+                            <td>NPI validation</td>
+                            <td><span class="badge bg-secondary">Regex 10-digit check</span></td>
+                            <td>NPPES NPI Registry lookup</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white fw-bold">X12 Integration Placeholder Tags</div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tag in Code</th>
+                            <th>Location</th>
+                            <th>What Replaces It in Production</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>[X12-277-PLACEHOLDER]</code></td>
+                            <td>Requests/Create page model</td>
+                            <td>Generate and transmit X12 277 Additional Information Request</td>
+                        </tr>
+                        <tr>
+                            <td><code>[X12-275-PLACEHOLDER]</code></td>
+                            <td>AttachmentProcessingService</td>
+                            <td>Parse incoming X12 275 Transaction Set to extract metadata and file</td>
+                        </tr>
+                        <tr>
+                            <td><code>[X12-275-CLEARINGHOUSE-PLACEHOLDER]</code></td>
+                            <td>MockClearinghouseService</td>
+                            <td>Replace mock DB query with real clearinghouse SFTP/API retrieval</td>
+                        </tr>
+                        <tr>
+                            <td><code>[X12-837-LINKAGE-PLACEHOLDER]</code></td>
+                            <td>ClaimMatchingService</td>
+                            <td>Supplement name/NPI matching with X12 837 ICN for exact linkage</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

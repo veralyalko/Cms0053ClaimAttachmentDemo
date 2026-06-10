@@ -1,0 +1,44 @@
+RADIOLOGY REPORT
+================
+[DEMO DATA - NOT REAL PHI]
+
+Patient:        James Wilson
+Date of Birth:  08/30/1955
+Provider NPI:   5551234567
+Provider:       Valley Orthopedic Group
+Service Date:   11/20/2025
+Exam Date:      11/20/2025
+Report Date:    11/20/2025
+
+Ordering Provider: Dr. D. Kim, MD (Orthopedic Surgery)
+Radiologist:       Dr. E. Okafor, MD
+Facility:          Valley Imaging Center
+
+EXAMINATION:
+X-Ray Left Knee, 3 Views (AP, Lateral, Sunrise)
+
+INDICATION:
+Left knee pain, swelling, and limited range of motion. Rule out
+osteoarthritis vs. acute injury. Diagnosis code M17.11.
+
+FINDINGS:
+- Moderate to severe joint space narrowing in the medial compartment
+  of the left knee
+- Osteophyte formation at the medial femoral condyle and medial tibial
+  plateau
+- Subchondral sclerosis present bilaterally
+- No acute fracture or dislocation identified
+- Soft tissue swelling noted medially
+- Patellofemoral joint: mild joint space narrowing
+
+IMPRESSION:
+1. Moderate to severe medial compartment osteoarthritis, left knee
+2. Mild patellofemoral osteoarthritis
+3. No acute osseous injury
+
+RECOMMENDATION:
+Clinical correlation recommended. Orthopedic consultation for
+possible total knee arthroplasty evaluation.
+
+--- END OF REPORT ---
+[DEMO DATA - FOR ILLUSTRATION PURPOSES ONLY]

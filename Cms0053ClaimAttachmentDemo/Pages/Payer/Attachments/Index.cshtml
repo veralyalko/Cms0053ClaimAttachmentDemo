@@ -1,0 +1,170 @@
+@page
+@model Cms0053ClaimAttachmentDemo.Pages.Payer.Attachments.IndexModel
+@using Cms0053ClaimAttachmentDemo.Models
+@{
+    ViewData["Title"] = "All Attachments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">All Attachments</h1>
+        <p class="text-muted mb-0">All received claim attachments across all three workflows.</p>
+    </div>
+    <a asp-page="/Payer/Dashboard" class="btn btn-outline-secondary">&larr; Dashboard</a>
+</div>
+
+@* Filter bar *@
+<form method="get" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold">Status</label>
+                <select asp-for="Status" class="form-select form-select-sm">
+                    <option value="">All statuses</option>
+                    @foreach (var s in IndexModel.AllStatuses)
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold">Source / Workflow</label>
+                <select asp-for="SourceType" class="form-select form-select-sm">
+                    <option value="">All sources</option>
+                    @foreach (var (value, label) in IndexModel.AllSourceTypes)
+                    {
+                        <option value="@value">@label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <label class="form-label small fw-semibold">Provider NPI</label>
+                <input type="text" name="Npi" value="@Model.Npi"
+                       class="form-control form-control-sm font-monospace" placeholder="10-digit NPI" maxlength="10" />
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <label class="form-label small fw-semibold">Patient Name</label>
+                <input type="text" name="Patient" value="@Model.Patient"
+                       class="form-control form-control-sm" placeholder="Partial name OK" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                @if (Model.HasFilters)
+                {
+                    <a asp-page="/Payer/Attachments/Index" class="btn btn-outline-secondary btn-sm">Clear</a>
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@* Result count *@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted small">
+        @if (Model.HasFilters)
+        {
+            <span>Showing <strong>@Model.TotalCount</strong> filtered result(s)</span>
+        }
+        else
+        {
+            <span><strong>@Model.TotalCount</strong> total attachment(s)</span>
+        }
+    </span>
+</div>
+
+@if (!Model.Attachments.Any())
+{
+    <div class="card">
+        <div class="card-body text-center text-muted py-5">
+            @if (Model.HasFilters)
+            {
+                <p class="mb-2">No attachments match the current filters.</p>
+                <a asp-page="/Payer/Attachments/Index" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+            }
+            else
+            {
+                <p class="mb-0">No attachments yet. Run through one of the three workflows first.</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-muted small">#</th>
+                        <th>Source</th>
+                        <th>Filename</th>
+                        <th>Patient</th>
+                        <th>Provider NPI</th>
+                        <th>Service Date</th>
+                        <th>Document Type</th>
+                        <th>Claim</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Attachments)
+                    {
+                        var statusBadge = a.Status switch
+                        {
+                            AttachmentStatus.Accepted         => "bg-success",
+                            AttachmentStatus.ValidationFailed => "bg-danger",
+                            AttachmentStatus.MatchFailed      => "bg-warning text-dark",
+                            AttachmentStatus.Matched          => "bg-primary",
+                            AttachmentStatus.Validated        => "bg-info text-dark",
+                            AttachmentStatus.Rejected         => "bg-danger",
+                            _                                 => "bg-secondary"
+                        };
+                        var sourceLabel = a.SourceType switch
+                        {
+                            AttachmentSourceType.Solicited                => "W1",
+                            AttachmentSourceType.UnsolicitedClearinghouse  => "W2",
+                            AttachmentSourceType.UnsolicitedDirect         => "W3",
+                            _                                              => "—"
+                        };
+                        var sourceBadge = a.SourceType switch
+                        {
+                            AttachmentSourceType.Solicited                => "bg-primary",
+                            AttachmentSourceType.UnsolicitedClearinghouse  => "bg-info text-dark",
+                            AttachmentSourceType.UnsolicitedDirect         => "bg-secondary",
+                            _                                              => "bg-light text-dark"
+                        };
+                        <tr>
+                            <td class="text-muted small">@a.Id</td>
+                            <td>
+                                <span class="badge @sourceBadge" title="@a.SourceType">@sourceLabel</span>
+                            </td>
+                            <td class="small text-truncate" style="max-width:160px" title="@a.FileName">@a.FileName</td>
+                            <td>@a.PatientName</td>
+                            <td class="font-monospace small">@a.ProviderNPI</td>
+                            <td class="small">@a.ServiceDate.ToString("MM/dd/yyyy")</td>
+                            <td class="small">@a.DocumentType</td>
+                            <td class="small">
+                                @if (a.Claim is not null)
+                                {
+                                    <span class="font-monospace">@a.Claim.ClaimNumber</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="small text-nowrap">@a.SubmittedAt.ToString("MM/dd HH:mm") UTC</td>
+                            <td><span class="badge @statusBadge">@a.Status</span></td>
+                            <td>
+                                <a asp-page="/Payer/Attachments/Detail" asp-route-id="@a.Id"
+                                   class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

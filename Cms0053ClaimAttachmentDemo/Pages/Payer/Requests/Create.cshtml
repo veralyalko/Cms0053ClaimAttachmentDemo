@@ -1,0 +1,112 @@
+@page
+@model Cms0053ClaimAttachmentDemo.Pages.Payer.Requests.CreateModel
+@{
+    ViewData["Title"] = "New Attachment Request";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">New Attachment Request</h1>
+        <p class="text-muted mb-0">Workflow 1 &mdash; Solicited attachment. Request documentation from a provider.</p>
+    </div>
+    <a asp-page="Index" class="btn btn-outline-secondary">Back to Requests</a>
+</div>
+
+<div class="alert alert-info small mb-4">
+    <strong>[X12-277-PLACEHOLDER]</strong> In production, submitting this form would generate
+    and transmit an X12 277 Additional Information Request transaction to the provider or clearinghouse.
+    In this demo, it creates a DB record and generates a secure upload link.
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header fw-semibold">Request Details</div>
+            <div class="card-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.ClaimId" class="form-label fw-semibold">Claim</label>
+                        <select asp-for="Input.ClaimId" class="form-select">
+                            <option value="0">-- Select a claim --</option>
+                            @foreach (var claim in Model.Claims)
+                            {
+                                <option value="@claim.Id">
+                                    @claim.ClaimNumber &mdash; @claim.PatientName &mdash; @claim.ProviderName &mdash; @claim.ServiceDate.ToString("MM/dd/yyyy")
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.ClaimId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.DocumentTypeRequested" class="form-label fw-semibold">Document Type Requested</label>
+                        <select asp-for="Input.DocumentTypeRequested" class="form-select">
+                            <option value="">-- Select document type --</option>
+                            @foreach (var dt in CreateModel.DocumentTypes)
+                            {
+                                <option value="@dt">@dt</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.DocumentTypeRequested" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.RequestReason" class="form-label fw-semibold">Request Reason</label>
+                        <textarea asp-for="Input.RequestReason" class="form-control" rows="3"
+                                  placeholder="e.g. Prior authorization review requires supporting clinical documentation."></textarea>
+                        <span asp-validation-for="Input.RequestReason" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.ProviderEmail" class="form-label fw-semibold">Provider Email</label>
+                        <input asp-for="Input.ProviderEmail" class="form-control"
+                               placeholder="provider@clinic.example" />
+                        <div class="form-text">The secure upload link will be associated with this address.</div>
+                        <span asp-validation-for="Input.ProviderEmail" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.DueDays" class="form-label fw-semibold">Response Due In (days)</label>
+                        <input asp-for="Input.DueDays" type="number" class="form-control" style="width:120px" min="1" max="90" />
+                        <span asp-validation-for="Input.DueDays" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Request &amp; Generate Upload Link</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card border-secondary">
+            <div class="card-header bg-light fw-semibold">Seeded Claims Reference</div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim #</th>
+                            <th>Patient</th>
+                            <th>Service Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Claims)
+                        {
+                            <tr>
+                                <td>@c.ClaimNumber</td>
+                                <td>@c.PatientName</td>
+                                <td>@c.ServiceDate.ToString("MM/dd/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

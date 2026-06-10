@@ -1,0 +1,133 @@
+@page
+@model Cms0053ClaimAttachmentDemo.Pages.Payer.DashboardModel
+@using Cms0053ClaimAttachmentDemo.Models
+@{
+    ViewData["Title"] = "Payer Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">Payer Dashboard</h1>
+        <p class="text-muted mb-0">All received attachments and processing results.</p>
+    </div>
+    <form method="post" asp-page-handler="Pull">
+        <button type="submit" class="btn btn-success position-relative">
+            Pull from Clearinghouse
+            @if (Model.PendingClearinghouseCount > 0)
+            {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    @Model.PendingClearinghouseCount
+                </span>
+            }
+        </button>
+    </form>
+</div>
+
+@if (Model.PullMessage is not null)
+{
+    var isError = Model.PullMessage.StartsWith("No new");
+    <div class="alert @(isError ? "alert-warning" : "alert-success") alert-dismissible mb-4" role="alert">
+        @Model.PullMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="display-6 fw-bold">@Model.TotalAttachments</div>
+                <div class="text-muted small">Total Attachments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-success">@Model.AcceptedCount</div>
+                <div class="text-muted small">Accepted</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-danger">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-danger">@Model.FailedCount</div>
+                <div class="text-muted small">Failed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-warning">@Model.PendingClearinghouseCount</div>
+                <div class="text-muted small">Pending in Clearinghouse</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        Recent Attachments
+        <a asp-page="/Payer/Attachments/Index" class="btn btn-sm btn-outline-secondary">View All</a>
+    </div>
+    @if (!Model.RecentAttachments.Any())
+    {
+        <div class="card-body text-center text-muted py-5">
+            No attachments yet. Run through one of the three workflows to see results here.
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Source</th>
+                        <th>Filename</th>
+                        <th>Patient</th>
+                        <th>Provider NPI</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.RecentAttachments)
+                    {
+                        var badge = a.Status switch
+                        {
+                            AttachmentStatus.Accepted         => "bg-success",
+                            AttachmentStatus.ValidationFailed => "bg-danger",
+                            AttachmentStatus.MatchFailed      => "bg-warning text-dark",
+                            AttachmentStatus.Matched          => "bg-primary",
+                            _                                 => "bg-secondary"
+                        };
+                        var sourceShort = a.SourceType switch
+                        {
+                            AttachmentSourceType.Solicited                => "W1 Solicited",
+                            AttachmentSourceType.UnsolicitedClearinghouse  => "W2 Clearinghouse",
+                            AttachmentSourceType.UnsolicitedDirect         => "W3 Direct/EMR",
+                            _                                              => a.SourceType
+                        };
+                        <tr>
+                            <td class="text-muted small">@a.Id</td>
+                            <td><span class="badge bg-secondary">@sourceShort</span></td>
+                            <td class="small">@a.FileName</td>
+                            <td>@a.PatientName</td>
+                            <td class="font-monospace small">@a.ProviderNPI</td>
+                            <td class="small">@a.SubmittedAt.ToString("MM/dd HH:mm") UTC</td>
+                            <td><span class="badge @badge">@a.Status</span></td>
+                            <td>
+                                <a asp-page="/Payer/Attachments/Detail" asp-route-id="@a.Id"
+                                   class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

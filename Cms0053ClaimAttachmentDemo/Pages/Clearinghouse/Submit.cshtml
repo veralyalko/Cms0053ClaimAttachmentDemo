@@ -1,0 +1,116 @@
+@page
+@model Cms0053ClaimAttachmentDemo.Pages.Clearinghouse.SubmitModel
+@{
+    ViewData["Title"] = "Submit to Clearinghouse";
+}
+
+<div class="mb-4">
+    <h1 class="h2 fw-bold">Submit Attachment to Clearinghouse</h1>
+    <p class="text-muted mb-0">Workflow 2 &mdash; Provider submits an unsolicited attachment via the mock clearinghouse.</p>
+</div>
+
+<div class="alert alert-info small mb-4">
+    <strong>[X12-275-CLEARINGHOUSE-PLACEHOLDER]</strong> In production, the provider system
+    would transmit an X12 275 transaction to a real clearinghouse (e.g. Availity, Change Healthcare).
+    In this demo, the form writes to a local staging table with status <strong>New</strong>.
+    The payer then pulls it from the Payer Dashboard.
+</div>
+
+@if (Model.Submitted is not null)
+{
+    <div class="alert alert-success mb-4">
+        <strong>Submitted to clearinghouse.</strong>
+        Tracking number: <span class="font-monospace">@Model.Submitted.TrackingNumber</span>.
+        The attachment is queued with status <strong>New</strong> and is waiting for the payer to pull it.
+        <br /><a asp-page="/Payer/Dashboard" class="alert-link">Go to Payer Dashboard to pull &rarr;</a>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header fw-semibold">Attachment Submission</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Input.ProviderNPI" class="form-label fw-semibold">Provider NPI <span class="text-danger">*</span></label>
+                            <input asp-for="Input.ProviderNPI" class="form-control font-monospace"
+                                   placeholder="10-digit NPI" maxlength="10" />
+                            <span asp-validation-for="Input.ProviderNPI" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Input.DocumentType" class="form-label fw-semibold">Document Type <span class="text-danger">*</span></label>
+                            <select asp-for="Input.DocumentType" class="form-select">
+                                <option value="">-- Select --</option>
+                                @foreach (var dt in SubmitModel.DocumentTypes)
+                                {
+                                    <option value="@dt">@dt</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.DocumentType" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Input.PatientName" class="form-label fw-semibold">Patient Name <span class="text-danger">*</span></label>
+                            <input asp-for="Input.PatientName" class="form-control" placeholder="Full name" />
+                            <span asp-validation-for="Input.PatientName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Input.PatientDOB" class="form-label fw-semibold">Patient DOB</label>
+                            <input asp-for="Input.PatientDOB" type="date" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.ServiceDate" class="form-label fw-semibold">Service Date <span class="text-danger">*</span></label>
+                        <input asp-for="Input.ServiceDate" type="date" class="form-control" style="width:200px" />
+                        <span asp-validation-for="Input.ServiceDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.File" class="form-label fw-semibold">Document File <span class="text-danger">*</span></label>
+                        <input asp-for="Input.File" type="file" class="form-control"
+                               accept=".pdf,.jpg,.jpeg,.png,.tiff,.tif,.txt" />
+                        <div class="form-text">Accepted: PDF, JPEG, PNG, TIFF, plain text. Maximum 10 MB.</div>
+                        <span asp-validation-for="Input.File" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Submit to Clearinghouse</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card border-secondary">
+            <div class="card-header bg-light fw-semibold">Seeded Claims (for matching)</div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-bordered mb-0 small">
+                    <thead class="table-light">
+                        <tr><th>NPI</th><th>Patient</th><th>Service Date</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="font-monospace">1234567890</td><td>John Smith</td><td>10/15/2025</td></tr>
+                        <tr><td class="font-monospace">1234567890</td><td>Maria Garcia</td><td>11/03/2025</td></tr>
+                        <tr><td class="font-monospace">9876543210</td><td>Robert Johnson</td><td>09/28/2025</td></tr>
+                        <tr><td class="font-monospace">9876543210</td><td>Linda Chen</td><td>12/10/2025</td></tr>
+                        <tr><td class="font-monospace">5551234567</td><td>James Wilson</td><td>11/20/2025</td></tr>
+                        <tr><td class="font-monospace">5551234567</td><td>Patricia Moore</td><td>12/05/2025</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-muted small">
+                Use these values to trigger a successful claim match.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

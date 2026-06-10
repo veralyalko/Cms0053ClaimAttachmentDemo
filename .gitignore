@@ -1,0 +1,20 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+
+## Uploaded files (local demo storage)
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
+
+## macOS
+.DS_Store
+
+## Rider / VS Code
+.idea/
+.vscode/

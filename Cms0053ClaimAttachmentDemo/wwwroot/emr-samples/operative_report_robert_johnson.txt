@@ -1,0 +1,43 @@
+OPERATIVE REPORT
+================
+[DEMO DATA - NOT REAL PHI]
+
+Patient:        Robert Johnson
+Date of Birth:  12/01/1960
+Provider NPI:   9876543210
+Provider:       Riverside Family Medicine
+Service Date:   09/28/2025
+Procedure Date: 09/28/2025
+
+Surgeon:        Dr. B. Torres, MD
+Assistant:      Dr. C. Nguyen, MD
+Anesthesia:     Local with sedation
+Facility:       Riverside Ambulatory Surgery Center
+
+PREOPERATIVE DIAGNOSIS:
+Type 2 Diabetes Mellitus with peripheral neuropathy (E11.9)
+
+POSTOPERATIVE DIAGNOSIS:
+Same
+
+PROCEDURE PERFORMED:
+Nerve conduction study and electromyography (NCS/EMG) of bilateral
+lower extremities to evaluate diabetic peripheral neuropathy.
+
+INDICATIONS:
+Patient is a 64-year-old male with long-standing Type 2 DM presenting
+with bilateral lower extremity numbness and tingling over the past
+6 months. The procedure was performed to quantify the degree of
+peripheral nerve involvement.
+
+FINDINGS:
+Reduced sensory nerve conduction velocities noted in bilateral sural
+and peroneal nerves consistent with length-dependent sensorimotor
+peripheral neuropathy. No evidence of acute radiculopathy.
+
+DISPOSITION:
+Patient tolerated procedure well. Discharged to home in stable
+condition. Follow-up scheduled in 4 weeks.
+
+--- END OF REPORT ---
+[DEMO DATA - FOR ILLUSTRATION PURPOSES ONLY]

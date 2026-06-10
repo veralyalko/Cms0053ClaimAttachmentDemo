@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CMS-0053 Claim Attachment Demo</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand fw-bold" asp-page="/Index">
+                    CMS-0053 Demo
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNav" aria-controls="mainNav"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Payer
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-page="/Payer/Dashboard">Dashboard</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" asp-page="/Payer/Requests/Index">Attachment Requests</a></li>
+                                <li><a class="dropdown-item" asp-page="/Payer/Attachments/Index">All Attachments</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Provider
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <h6 class="dropdown-header">Workflow 1 — Solicited</h6>
+                                </li>
+                                <li><a class="dropdown-item" asp-page="/Payer/Requests/Index">View Payer Requests</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <h6 class="dropdown-header">Workflow 3 — Direct / EMR</h6>
+                                </li>
+                                <li><a class="dropdown-item" asp-page="/Provider/DirectSubmit">Direct Submit</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Clearinghouse
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <h6 class="dropdown-header">Workflow 2 — Unsolicited</h6>
+                                </li>
+                                <li><a class="dropdown-item" asp-page="/Clearinghouse/Submit">Submit Attachment</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Readiness">CMS-0053 Readiness</a>
+                        </li>
+
+                    </ul>
+                    <span class="navbar-text text-secondary small">
+                        Demo Only &mdash; No Real PHI
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        <main role="main" class="pb-4">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top bg-light py-3 mt-4">
+        <div class="container">
+            <p class="mb-0 text-muted small">
+                CMS-0053-F Claim Attachment Demo &mdash; Prototype only.
+                All patient data is synthetic. No real X12 parsing is implemented.
+            </p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

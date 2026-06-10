@@ -1,0 +1,143 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2 fw-bold">CMS-0053-F Claim Attachment Demo</h1>
+        <p class="text-muted mb-1">
+            A standards-aligned prototype demonstrating payer-side claim attachment workflows.
+        </p>
+        <p class="text-muted small">
+            This demo simulates X12 275 (attachment submission) and X12 277 (payer request) workflows
+            using form-based interactions. All patient data is synthetic. No real EDI parsing is performed.
+        </p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="alert alert-info d-flex align-items-start" role="alert">
+            <div>
+                <strong>How to use this demo:</strong>
+                Select a workflow card below to walk through a specific CMS-0053 scenario.
+                Each workflow ends on the Payer Dashboard where you can see validation results,
+                claim matching, and status history.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">
+                <strong>Workflow 1</strong>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Solicited Attachment</h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Payer reviews a claim and requests additional documentation from the provider.
+                    Provider receives a secure upload link and submits the document.
+                </p>
+                <ul class="list-unstyled small text-muted mb-3">
+                    <li>&#x2192; Payer creates attachment request</li>
+                    <li>&#x2192; Provider uploads via secure link</li>
+                    <li>&#x2192; Payer processes and matches to claim</li>
+                    <li class="text-secondary fst-italic">X12 277 placeholder included</li>
+                </ul>
+                <a asp-page="/Payer/Requests/Index" class="btn btn-primary mt-auto">
+                    Start Workflow 1
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">
+                <strong>Workflow 2</strong>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Unsolicited via Clearinghouse</h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Provider submits an attachment to a mock clearinghouse.
+                    Payer pulls new attachments and runs the shared processing pipeline.
+                </p>
+                <ul class="list-unstyled small text-muted mb-3">
+                    <li>&#x2192; Provider submits to clearinghouse</li>
+                    <li>&#x2192; Payer pulls new attachments</li>
+                    <li>&#x2192; Pipeline validates and matches</li>
+                    <li class="text-secondary fst-italic">X12 275 clearinghouse placeholder included</li>
+                </ul>
+                <a asp-page="/Clearinghouse/Submit" class="btn btn-success mt-auto">
+                    Start Workflow 2
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-purple" style="border-color: #6f42c1 !important;">
+            <div class="card-header text-white" style="background-color: #6f42c1;">
+                <strong>Workflow 3</strong>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Unsolicited Direct / EMR</h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Provider or EMR user submits directly to the payer.
+                    Demo includes seeded fake EMR documents to simulate EHR integration.
+                </p>
+                <ul class="list-unstyled small text-muted mb-3">
+                    <li>&#x2192; Provider selects EMR doc or uploads file</li>
+                    <li>&#x2192; Submits directly to payer</li>
+                    <li>&#x2192; Pipeline validates and matches</li>
+                    <li class="text-secondary fst-italic">FHIR DocumentReference placeholder included</li>
+                </ul>
+                <a asp-page="/Provider/DirectSubmit" class="btn mt-auto text-white" style="background-color: #6f42c1;">
+                    Start Workflow 3
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+        <div class="card h-100 border-dark">
+            <div class="card-header bg-dark text-white">
+                <strong>Payer Dashboard</strong>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">All Attachments &amp; Processing Results</h5>
+                <p class="card-text text-muted flex-grow-1">
+                    View all received attachments across all three workflows.
+                    Inspect validation results, claim match status, and full status history.
+                </p>
+                <a asp-page="/Payer/Dashboard" class="btn btn-dark mt-auto">
+                    Open Payer Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <strong>CMS-0053 Readiness</strong>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Standards Alignment &amp; X12 Integration Points</h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Review how each workflow maps to CMS-0053-F requirements.
+                    See exactly where X12 275, 277, and 837 would plug in for production.
+                </p>
+                <a asp-page="/Readiness" class="btn btn-warning mt-auto">
+                    View Readiness Checklist
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
