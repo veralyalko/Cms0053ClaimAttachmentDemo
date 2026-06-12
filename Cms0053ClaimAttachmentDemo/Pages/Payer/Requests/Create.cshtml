@@ -28,26 +28,16 @@
 
                     <div class="mb-3">
                         <label asp-for="Input.ClaimId" class="form-label fw-semibold">Claim</label>
-                        <select asp-for="Input.ClaimId" class="form-select">
+                        <select asp-for="Input.ClaimId" asp-items="Model.ClaimsSelectList" class="form-select">
                             <option value="0">-- Select a claim --</option>
-                            @foreach (var claim in Model.Claims)
-                            {
-                                <option value="@claim.Id">
-                                    @claim.ClaimNumber &mdash; @claim.PatientName &mdash; @claim.ProviderName &mdash; @claim.ServiceDate.ToString("MM/dd/yyyy")
-                                </option>
-                            }
                         </select>
                         <span asp-validation-for="Input.ClaimId" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Input.DocumentTypeRequested" class="form-label fw-semibold">Document Type Requested</label>
-                        <select asp-for="Input.DocumentTypeRequested" class="form-select">
+                        <select asp-for="Input.DocumentTypeRequested" asp-items="Model.DocumentTypesSelectList" class="form-select">
                             <option value="">-- Select document type --</option>
-                            @foreach (var dt in CreateModel.DocumentTypes)
-                            {
-                                <option value="@dt">@dt</option>
-                            }
                         </select>
                         <span asp-validation-for="Input.DocumentTypeRequested" class="text-danger small"></span>
                     </div>
@@ -92,12 +82,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var c in Model.Claims)
+                        @foreach (var item in Model.ClaimsSelectList)
                         {
                             <tr>
-                                <td>@c.ClaimNumber</td>
-                                <td>@c.PatientName</td>
-                                <td>@c.ServiceDate.ToString("MM/dd/yyyy")</td>
+                                <td>@item.Text.Split('—')[0].Trim()</td>
+                                <td>@item.Text.Split('—').ElementAtOrDefault(1)?.Trim()</td>
+                                <td>@item.Text.Split('—').ElementAtOrDefault(3)?.Trim()</td>
                             </tr>
                         }
                     </tbody>

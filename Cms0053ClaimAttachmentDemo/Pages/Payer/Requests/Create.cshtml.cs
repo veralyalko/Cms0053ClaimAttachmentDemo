@@ -3,6 +3,7 @@ using Cms0053ClaimAttachmentDemo.Data;
 using Cms0053ClaimAttachmentDemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cms0053ClaimAttachmentDemo.Pages.Payer.Requests;
@@ -12,7 +13,8 @@ public class CreateModel(AppDbContext db) : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
-    public List<Claim> Claims { get; set; } = [];
+    public SelectList ClaimsSelectList { get; set; } = null!;
+    public SelectList DocumentTypesSelectList { get; set; } = null!;
 
     public static readonly List<string> DocumentTypes =
     [
@@ -27,12 +29,12 @@ public class CreateModel(AppDbContext db) : PageModel
 
     public async Task OnGetAsync()
     {
-        Claims = await db.Claims.OrderBy(c => c.ClaimNumber).ToListAsync();
+        await LoadSelectListsAsync();
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        Claims = await db.Claims.OrderBy(c => c.ClaimNumber).ToListAsync();
+        await LoadSelectListsAsync();
 
         if (!ModelState.IsValid)
             return Page();
@@ -57,6 +59,19 @@ public class CreateModel(AppDbContext db) : PageModel
         await db.SaveChangesAsync();
 
         return RedirectToPage("Detail", new { id = request.Id });
+    }
+
+    private async Task LoadSelectListsAsync()
+    {
+        var claims = await db.Claims.OrderBy(c => c.ClaimNumber).ToListAsync();
+        ClaimsSelectList = new SelectList(
+            claims.Select(c => new {
+                c.Id,
+                Label = $"{c.ClaimNumber} — {c.PatientName} — {c.ProviderName} — {c.ServiceDate:MM/dd/yyyy}"
+            }),
+            "Id", "Label", Input.ClaimId);
+
+        DocumentTypesSelectList = new SelectList(DocumentTypes, Input.DocumentTypeRequested);
     }
 
     public class InputModel
