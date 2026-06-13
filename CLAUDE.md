@@ -265,6 +265,7 @@ Every placeholder is marked in code with a comment tag so they are easy to find 
 | `[X12-275-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Parse an incoming X12 275 Transaction Set envelope to extract metadata and binary payload instead of reading form fields |
 | `[X12-275-CLEARINGHOUSE-PLACEHOLDER]` | `MockClearinghouseService.cs` | Replace mock DB query with real clearinghouse API or SFTP retrieval of X12 275 transactions |
 | `[X12-837-LINKAGE-PLACEHOLDER]` | `ClaimMatchingService.cs` | Supplement name/NPI matching with the X12 837 Internal Control Number (ICN) for exact claim linkage |
+| `[SCHEMATRON-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace hand-coded LINQ-to-XML assertions with compiled HL7 C-CDA Schematron XSLT execution (Saxon-HE) against the full official rule set |
 
 ---
 

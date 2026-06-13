@@ -42,6 +42,31 @@ public partial class AttachmentProcessingService(
 
     private static readonly XNamespace CdaNs = "urn:hl7-org:v3";
 
+    // LOINC codes that C-CDA <code> must carry for each submitted DocumentType label.
+    private static readonly IReadOnlyDictionary<string, string[]> LoincByDocumentType =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Lab Results"]            = ["11502-2"],
+            ["Operative Report"]       = ["11504-8"],
+            ["Radiology Report"]       = ["18748-4"],
+            ["Office Visit Notes"]     = ["34117-2"],
+            ["Physical Therapy Notes"] = ["11514-3"],
+            ["Consultation Note"]      = ["11488-4"],
+        };
+
+    // SHALL-conformance section assertions per document LOINC, mirroring C-CDA R2.1 Schematron rules.
+    // [SCHEMATRON-PLACEHOLDER] In production, replace with compiled HL7 C-CDA Schematron XSLT (Saxon-HE).
+    private static readonly IReadOnlyDictionary<string, (string Code, string Display)[]> RequiredSectionsByLoinc =
+        new Dictionary<string, (string Code, string Display)[]>
+        {
+            ["11502-2"] = [("30954-2", "Results")],
+            ["11504-8"] = [("29554-3", "Procedure Description")],
+            ["18748-4"] = [("18782-3", "Radiology Study")],
+            ["34117-2"] = [("10154-3", "Chief Complaint"), ("51847-2", "Assessment and Plan")],
+            ["11514-3"] = [("61150-9", "Subjective"), ("61149-1", "Objective")],
+            ["11488-4"] = [("10154-3", "Chief Complaint")],
+        };
+
     // [X12-275-PLACEHOLDER] In production, this method accepts a parsed X12 275 Transaction Set
     // envelope instead of an IFormFile + metadata. The binary attachment and loop data segments
     // (2000A/2000B/2000C/2100/2200) map directly to the fields populated below.
@@ -182,9 +207,9 @@ public partial class AttachmentProcessingService(
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
             errors, warnings);
 
-        // C-CDA structural validation for XML submissions
+        // C-CDA structural + template validation for XML submissions
         if (contentType is "text/xml" or "application/xml")
-            ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), errors, warnings);
+            ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), documentType, errors, warnings);
 
         db.AttachmentValidationResults.Add(new AttachmentValidationResult
         {
@@ -286,13 +311,10 @@ public partial class AttachmentProcessingService(
             errors.Add("Document type is required.");
     }
 
-    private static void ValidateCcda(string filePath, List<string> errors, List<string> warnings)
+    private static void ValidateCcda(string filePath, string documentType, List<string> errors, List<string> warnings)
     {
         XDocument doc;
-        try
-        {
-            doc = XDocument.Load(filePath);
-        }
+        try { doc = XDocument.Load(filePath); }
         catch (Exception ex)
         {
             errors.Add($"XML is not well-formed: {ex.Message}");
@@ -312,22 +334,52 @@ public partial class AttachmentProcessingService(
         }
 
         // Required CDA R2 header elements
-        if (doc.Root.Element(CdaNs + "recordTarget") is null)
-            errors.Add("C-CDA: missing required <recordTarget> element.");
-        if (doc.Root.Element(CdaNs + "author") is null)
-            errors.Add("C-CDA: missing required <author> element.");
-        if (doc.Root.Element(CdaNs + "custodian") is null)
-            errors.Add("C-CDA: missing required <custodian> element.");
-        if (doc.Root.Element(CdaNs + "code") is null)
-            errors.Add("C-CDA: missing required document type <code> element (LOINC).");
-        if (doc.Root.Element(CdaNs + "effectiveTime") is null)
-            errors.Add("C-CDA: missing required <effectiveTime> element.");
+        if (doc.Root.Element(CdaNs + "recordTarget") is null) errors.Add("C-CDA: missing required <recordTarget> element.");
+        if (doc.Root.Element(CdaNs + "author") is null)       errors.Add("C-CDA: missing required <author> element.");
+        if (doc.Root.Element(CdaNs + "custodian") is null)    errors.Add("C-CDA: missing required <custodian> element.");
+        if (doc.Root.Element(CdaNs + "effectiveTime") is null) errors.Add("C-CDA: missing required <effectiveTime> element.");
 
-        // US Realm Header template — warning only since some valid docs omit it
         var hasUsRealmTemplate = doc.Root.Elements(CdaNs + "templateId")
             .Any(t => t.Attribute("root")?.Value == "2.16.840.1.113883.10.20.22.1.1");
         if (!hasUsRealmTemplate)
             warnings.Add("C-CDA: US Realm Header templateId (2.16.840.1.113883.10.20.22.1.1) not found. Document may not be C-CDA R2.1 compliant.");
+
+        var codeEl = doc.Root.Element(CdaNs + "code");
+        if (codeEl is null)
+        {
+            errors.Add("C-CDA: missing required document type <code> element (LOINC).");
+            return;
+        }
+
+        var docLoinc = codeEl.Attribute("code")?.Value;
+        if (string.IsNullOrEmpty(docLoinc))
+        {
+            errors.Add("C-CDA: <code> element is missing the LOINC 'code' attribute.");
+            return;
+        }
+
+        // Cross-validate LOINC in the document against the submitted DocumentType metadata field.
+        if (LoincByDocumentType.TryGetValue(documentType, out var expectedLoincs) &&
+            !expectedLoincs.Contains(docLoinc))
+        {
+            errors.Add($"C-CDA: document type '{documentType}' expects LOINC " +
+                       $"{string.Join(" or ", expectedLoincs)}, but <code> contains {docLoinc}.");
+        }
+
+        // Template conformance: check that required sections are present for this document type.
+        var sectionCodes = doc.Descendants(CdaNs + "section")
+            .Select(s => s.Element(CdaNs + "code")?.Attribute("code")?.Value)
+            .Where(c => c is not null)
+            .ToHashSet();
+
+        if (RequiredSectionsByLoinc.TryGetValue(docLoinc, out var requiredSections))
+        {
+            foreach (var (code, display) in requiredSections)
+            {
+                if (!sectionCodes.Contains(code))
+                    errors.Add($"C-CDA template: required section '{display}' (LOINC {code}) is missing.");
+            }
+        }
     }
 
     [GeneratedRegex(@"^\d{10}$")]
