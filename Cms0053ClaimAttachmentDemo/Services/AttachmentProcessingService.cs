@@ -55,6 +55,17 @@ public partial class AttachmentProcessingService(
             ["Consultation Note"]      = ["11488-4"],
         };
 
+    // [NPPES-PLACEHOLDER] In production, replace with an HTTP call to the CMS NPPES NPI Registry:
+    // GET https://npiregistry.cms.hhs.gov/api/?number={npi}&version=2.1
+    // Parse the JSON result_count and basic_info.status fields to verify active enrollment.
+    private static readonly IReadOnlyDictionary<string, string> MockNpiRegistry =
+        new Dictionary<string, string>
+        {
+            ["1234567890"] = "Metro Health Clinic",
+            ["9876543210"] = "Riverside Family Medicine",
+            ["5551234567"] = "Valley Orthopedic Group",
+        };
+
     // SHALL-conformance section assertions per document LOINC, mirroring C-CDA R2.1 Schematron rules.
     // [SCHEMATRON-PLACEHOLDER] In production, replace with compiled HL7 C-CDA Schematron XSLT (Saxon-HE).
     private static readonly IReadOnlyDictionary<string, (string Code, string Display)[]> RequiredSectionsByLoinc =
@@ -209,6 +220,7 @@ public partial class AttachmentProcessingService(
         await CheckDuplicatesAsync(attachment, providerNPI, patientName, serviceDate, documentType, errors, warnings);
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
             errors, warnings);
+        ValidateNpi(providerNPI, errors);
 
         // C-CDA structural + template validation for XML submissions
         if (contentType is "text/xml" or "application/xml")
@@ -286,6 +298,17 @@ public partial class AttachmentProcessingService(
             ChangedAt         = DateTime.UtcNow,
             ChangedBy         = "System"
         });
+    }
+
+    private static void ValidateNpi(string providerNPI, List<string> errors)
+    {
+        // Skip registry check if NPI already failed format validation.
+        if (!NpiRegex().IsMatch(providerNPI))
+            return;
+
+        if (!MockNpiRegistry.ContainsKey(providerNPI))
+            errors.Add($"Provider NPI {providerNPI} was not found in the NPI registry. " +
+                       "Verify the NPI is correct and active.");
     }
 
     private async Task CheckDuplicatesAsync(
