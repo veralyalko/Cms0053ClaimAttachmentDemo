@@ -222,9 +222,10 @@ public partial class AttachmentProcessingService(
             errors, warnings);
         ValidateNpi(providerNPI, errors);
 
-        // C-CDA structural + template validation for XML submissions
+        // C-CDA structural, template, and identity validation for XML submissions
         if (contentType is "text/xml" or "application/xml")
-            ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), documentType, errors, warnings);
+            ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), documentType,
+                patientName, attachment.PatientDOB, providerNPI, serviceDate, errors, warnings);
 
         db.AttachmentValidationResults.Add(new AttachmentValidationResult
         {
@@ -370,7 +371,10 @@ public partial class AttachmentProcessingService(
             errors.Add("Document type is required.");
     }
 
-    private static void ValidateCcda(string filePath, string documentType, List<string> errors, List<string> warnings)
+    private static void ValidateCcda(
+        string filePath, string documentType,
+        string patientName, DateOnly? patientDOB, string providerNPI, DateOnly serviceDate,
+        List<string> errors, List<string> warnings)
     {
         XDocument doc;
         try { doc = XDocument.Load(filePath); }
@@ -438,6 +442,57 @@ public partial class AttachmentProcessingService(
                 if (!sectionCodes.Contains(code))
                     errors.Add($"C-CDA template: required section '{display}' (LOINC {code}) is missing.");
             }
+        }
+
+        // Identity cross-checks: C-CDA content vs submitted metadata
+        var patientEl = doc.Root
+            .Element(CdaNs + "recordTarget")?
+            .Element(CdaNs + "patientRole")?
+            .Element(CdaNs + "patient");
+
+        if (patientEl is not null)
+        {
+            var nameEl = patientEl.Element(CdaNs + "name");
+            if (nameEl is not null)
+            {
+                var given  = nameEl.Element(CdaNs + "given")?.Value.Trim() ?? "";
+                var family = nameEl.Element(CdaNs + "family")?.Value.Trim() ?? "";
+                var ccdaName = $"{given} {family}".Trim();
+                if (!string.Equals(ccdaName, patientName.Trim(), StringComparison.OrdinalIgnoreCase))
+                    errors.Add($"C-CDA identity: patient name in document ('{ccdaName}') does not match " +
+                               $"submitted patient name ('{patientName.Trim()}').");
+            }
+
+            var birthTimeStr = patientEl.Element(CdaNs + "birthTime")?.Attribute("value")?.Value;
+            if (birthTimeStr is { Length: >= 8 } &&
+                DateOnly.TryParseExact(birthTimeStr[..8], "yyyyMMdd", out var ccdaDob))
+            {
+                if (patientDOB.HasValue && ccdaDob != patientDOB.Value)
+                    errors.Add($"C-CDA identity: patient date of birth in document ({ccdaDob:MM/dd/yyyy}) " +
+                               $"does not match submitted DOB ({patientDOB.Value:MM/dd/yyyy}).");
+            }
+        }
+
+        var authorNpis = doc.Root.Elements(CdaNs + "author")
+            .SelectMany(a => a.Element(CdaNs + "assignedAuthor")?.Elements(CdaNs + "id")
+                             ?? Enumerable.Empty<XElement>())
+            .Where(id => id.Attribute("root")?.Value == "2.16.840.1.113883.4.6")
+            .Select(id => id.Attribute("extension")?.Value)
+            .Where(n => n is not null)
+            .ToHashSet();
+
+        if (authorNpis.Count > 0 && !authorNpis.Contains(providerNPI))
+            errors.Add($"C-CDA identity: author NPI in document ({string.Join(", ", authorNpis)}) " +
+                       $"does not match submitted provider NPI ({providerNPI}).");
+
+        var effectiveTimeStr = doc.Root.Element(CdaNs + "effectiveTime")?.Attribute("value")?.Value;
+        if (effectiveTimeStr is { Length: >= 8 } &&
+            DateOnly.TryParseExact(effectiveTimeStr[..8], "yyyyMMdd", out var ccdaEffective))
+        {
+            var daysDiff = Math.Abs(ccdaEffective.DayNumber - serviceDate.DayNumber);
+            if (daysDiff > 30)
+                warnings.Add($"C-CDA: document effective date ({ccdaEffective:MM/dd/yyyy}) differs from " +
+                             $"submitted service date ({serviceDate:MM/dd/yyyy}) by {daysDiff} days.");
         }
     }
 
