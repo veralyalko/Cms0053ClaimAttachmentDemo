@@ -13,6 +13,7 @@ public class CreateModel(AppDbContext db) : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    public List<Claim> Claims { get; set; } = [];
     public SelectList ClaimsSelectList { get; set; } = null!;
     public SelectList DocumentTypesSelectList { get; set; } = null!;
 
@@ -63,9 +64,9 @@ public class CreateModel(AppDbContext db) : PageModel
 
     private async Task LoadSelectListsAsync()
     {
-        var claims = await db.Claims.OrderBy(c => c.ClaimNumber).ToListAsync();
+        Claims = await db.Claims.OrderBy(c => c.ClaimNumber).ToListAsync();
         ClaimsSelectList = new SelectList(
-            claims.Select(c => new {
+            Claims.Select(c => new {
                 c.Id,
                 Label = $"{c.ClaimNumber} — {c.PatientName} — {c.ProviderName} — {c.ServiceDate:MM/dd/yyyy}"
             }),

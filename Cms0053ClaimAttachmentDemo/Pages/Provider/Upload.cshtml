@@ -15,11 +15,17 @@
             </p>
         </div>
 
-        @if (Model.AttachReq.Status == "Fulfilled")
+        @if (Model.RequestInactive)
         {
-            <div class="alert alert-info text-center">
-                <strong>This request has already been fulfilled.</strong>
-                The document was previously submitted. No further action is needed.
+            var (alertClass, message) = Model.AttachReq.Status switch
+            {
+                "Fulfilled"  => ("alert-success",   "This request has already been fulfilled. The document was previously submitted. No further action is needed."),
+                "Cancelled"  => ("alert-danger",    "This request has been cancelled by the payer. Please contact the payer if you believe this is an error."),
+                "Expired"    => ("alert-warning",   "This request has expired. The response deadline has passed. Please contact the payer to request a new upload link."),
+                _            => ("alert-secondary", "This request is no longer accepting submissions.")
+            };
+            <div class="alert @alertClass text-center">
+                <strong>@Model.AttachReq.Status.</strong> @message
             </div>
         }
         else

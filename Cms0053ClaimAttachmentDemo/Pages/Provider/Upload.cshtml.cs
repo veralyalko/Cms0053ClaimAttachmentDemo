@@ -15,11 +15,14 @@ public class UploadModel(AppDbContext db, AttachmentProcessingService pipeline) 
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    public bool RequestInactive { get; set; }
+
     public async Task<IActionResult> OnGetAsync(string token)
     {
         var request = await LoadRequest(token);
         if (request is null) return NotFound();
         AttachReq = request;
+        RequestInactive = request.Status != AttachmentRequestStatus.Pending;
         return Page();
     }
 
@@ -28,6 +31,12 @@ public class UploadModel(AppDbContext db, AttachmentProcessingService pipeline) 
         var request = await LoadRequest(token);
         if (request is null) return NotFound();
         AttachReq = request;
+
+        if (request.Status != AttachmentRequestStatus.Pending)
+        {
+            RequestInactive = true;
+            return Page();
+        }
 
         if (!ModelState.IsValid)
             return Page();
@@ -51,8 +60,8 @@ public class UploadModel(AppDbContext db, AttachmentProcessingService pipeline) 
         return RedirectToPage("/Payer/Attachments/Detail", new { id = result.ClaimAttachmentId });
     }
 
-    private async Task<AttachmentRequest?> LoadRequest(string token) =>
-        await db.AttachmentRequests
+    private Task<AttachmentRequest?> LoadRequest(string token) =>
+        db.AttachmentRequests
             .Include(r => r.Claim)
             .FirstOrDefaultAsync(r => r.SecureUploadToken == token);
 

@@ -13,7 +13,16 @@
         <h1 class="h2 fw-bold">Attachment Request</h1>
         <p class="text-muted mb-0">Tracking: <strong>@Model.AttachReq.TrackingNumber</strong></p>
     </div>
-    <a asp-page="Index" class="btn btn-outline-secondary">All Requests</a>
+    <div class="d-flex gap-2">
+        @if (Model.AttachReq.Status == AttachmentRequestStatus.Pending)
+        {
+            <form method="post" asp-page-handler="Cancel" asp-route-id="@Model.AttachReq.Id"
+                  onsubmit="return confirm('Cancel this request? The provider upload link will no longer be valid.')">
+                <button type="submit" class="btn btn-outline-danger">Cancel Request</button>
+            </form>
+        }
+        <a asp-page="Index" class="btn btn-outline-secondary">All Requests</a>
+    </div>
 </div>
 
 @if (isFulfilled)

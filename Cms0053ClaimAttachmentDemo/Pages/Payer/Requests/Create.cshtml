@@ -82,12 +82,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model.ClaimsSelectList)
+                        @foreach (var c in Model.Claims)
                         {
                             <tr>
-                                <td>@item.Text.Split('—')[0].Trim()</td>
-                                <td>@item.Text.Split('—').ElementAtOrDefault(1)?.Trim()</td>
-                                <td>@item.Text.Split('—').ElementAtOrDefault(3)?.Trim()</td>
+                                <td>@c.ClaimNumber</td>
+                                <td>@c.PatientName</td>
+                                <td>@c.ServiceDate.ToString("MM/dd/yyyy")</td>
                             </tr>
                         }
                     </tbody>

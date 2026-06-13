@@ -15,6 +15,36 @@ public class DetailModel(AppDbContext db) : PageModel
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
+        if (!await LoadAsync(id)) return NotFound();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostRejectAsync(int id, string? reason)
+    {
+        if (!await LoadAsync(id)) return NotFound();
+
+        if (Attachment.Status == AttachmentStatus.MatchFailed ||
+            Attachment.Status == AttachmentStatus.ValidationFailed)
+        {
+            var prev = Attachment.Status;
+            Attachment.Status = AttachmentStatus.Rejected;
+            db.AttachmentStatusHistories.Add(new AttachmentStatusHistory
+            {
+                ClaimAttachmentId = id,
+                FromStatus        = prev,
+                ToStatus          = AttachmentStatus.Rejected,
+                Notes             = string.IsNullOrWhiteSpace(reason) ? "Rejected by payer" : reason,
+                ChangedAt         = DateTime.UtcNow,
+                ChangedBy         = "Payer"
+            });
+            await db.SaveChangesAsync();
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    private async Task<bool> LoadAsync(int id)
+    {
         var attachment = await db.ClaimAttachments
             .Include(a => a.Claim)
             .Include(a => a.AttachmentRequest)
@@ -22,9 +52,7 @@ public class DetailModel(AppDbContext db) : PageModel
             .Include(a => a.StatusHistory.OrderBy(h => h.ChangedAt))
             .FirstOrDefaultAsync(a => a.Id == id);
 
-        if (attachment is null)
-            return NotFound();
-
+        if (attachment is null) return false;
         Attachment = attachment;
 
         if (attachment.ValidationResult is not null)
@@ -35,6 +63,6 @@ public class DetailModel(AppDbContext db) : PageModel
                 attachment.ValidationResult.Warnings) ?? [];
         }
 
-        return Page();
+        return true;
     }
 }

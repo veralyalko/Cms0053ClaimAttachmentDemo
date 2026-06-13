@@ -29,4 +29,18 @@ public class DetailModel(AppDbContext db) : PageModel
 
         return Page();
     }
+
+    public async Task<IActionResult> OnPostCancelAsync(int id)
+    {
+        var request = await db.AttachmentRequests.FindAsync(id);
+        if (request is null) return NotFound();
+
+        if (request.Status == AttachmentRequestStatus.Pending)
+        {
+            request.Status = AttachmentRequestStatus.Cancelled;
+            await db.SaveChangesAsync();
+        }
+
+        return RedirectToPage(new { id });
+    }
 }

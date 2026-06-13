@@ -29,7 +29,17 @@
         <h1 class="h2 fw-bold">Attachment #@a.Id</h1>
         <p class="text-muted mb-0">@sourceLabel</p>
     </div>
-    <span class="badge @statusBadge fs-6">@a.Status</span>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge @statusBadge fs-6">@a.Status</span>
+        @if (a.Status is AttachmentStatus.MatchFailed or AttachmentStatus.ValidationFailed)
+        {
+            <form method="post" asp-page-handler="Reject" asp-route-id="@a.Id"
+                  onsubmit="return confirm('Reject this attachment? This action is recorded in the audit trail.')">
+                <input type="hidden" name="reason" value="Rejected by payer after manual review" />
+                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+            </form>
+        }
+    </div>
 </div>
 
 <div class="row g-4">

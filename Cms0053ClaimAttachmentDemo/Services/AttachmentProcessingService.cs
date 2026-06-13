@@ -168,6 +168,11 @@ public partial class AttachmentProcessingService(
         string fileName, string contentType, long fileSizeBytes,
         string providerNPI, string patientName, DateOnly serviceDate, string documentType)
     {
+        attachment.Status = AttachmentStatus.Processing;
+        AddHistory(attachment.Id, AttachmentStatus.Received, AttachmentStatus.Processing,
+            "Pipeline started: validating file and metadata");
+        await db.SaveChangesAsync();
+
         var errors = new List<string>();
         var warnings = new List<string>();
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
@@ -185,7 +190,7 @@ public partial class AttachmentProcessingService(
         if (errors.Count > 0)
         {
             attachment.Status = AttachmentStatus.ValidationFailed;
-            AddHistory(attachment.Id, AttachmentStatus.Received, AttachmentStatus.ValidationFailed,
+            AddHistory(attachment.Id, AttachmentStatus.Processing, AttachmentStatus.ValidationFailed,
                 $"{errors.Count} validation error(s) found");
             await db.SaveChangesAsync();
             return new ProcessingResult(false, attachment.Id, AttachmentStatus.ValidationFailed,
@@ -193,14 +198,16 @@ public partial class AttachmentProcessingService(
         }
 
         attachment.Status = AttachmentStatus.Validated;
-        AddHistory(attachment.Id, AttachmentStatus.Received, AttachmentStatus.Validated,
+        AddHistory(attachment.Id, AttachmentStatus.Processing, AttachmentStatus.Validated,
             "All validation checks passed");
 
         // [X12-837-LINKAGE-PLACEHOLDER] In production, use the X12 837 ICN from the original
         // claim transaction for exact matching instead of name + NPI + date proximity.
-        var matchedClaim = await claimMatcher.MatchAsync(providerNPI, patientName, serviceDate);
+        var matchResult = await claimMatcher.MatchAsync(
+            providerNPI, patientName, serviceDate, attachment.PatientDOB);
+        warnings.AddRange(matchResult.Warnings);
 
-        if (matchedClaim is null)
+        if (matchResult.Claim is null)
         {
             attachment.Status = AttachmentStatus.MatchFailed;
             AddHistory(attachment.Id, AttachmentStatus.Validated, AttachmentStatus.MatchFailed,
@@ -210,6 +217,7 @@ public partial class AttachmentProcessingService(
                 errors, warnings, null);
         }
 
+        var matchedClaim = matchResult.Claim;
         attachment.ClaimId = matchedClaim.Id;
         attachment.Status = AttachmentStatus.Matched;
         AddHistory(attachment.Id, AttachmentStatus.Validated, AttachmentStatus.Matched,
