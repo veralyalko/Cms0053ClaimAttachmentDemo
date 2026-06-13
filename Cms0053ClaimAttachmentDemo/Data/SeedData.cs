@@ -147,6 +147,16 @@ public static class SeedData
                 ProviderNPI  = "9876543210",
                 ServiceDate  = new DateOnly(2025, 12, 10),
                 FileName     = "therapy_notes_linda_chen.xml"
+            },
+            new()
+            {
+                DocumentName = "Spine Consultation Note — Patricia Moore (12/05/2025)",
+                DocumentType = "Consultation Note",
+                PatientName  = "Patricia Moore",
+                PatientDOB   = new DateOnly(1948, 2, 17),
+                ProviderNPI  = "5551234567",
+                ServiceDate  = new DateOnly(2025, 12, 5),
+                FileName     = "spine_consult_patricia_moore.xml"
             }
         };
 

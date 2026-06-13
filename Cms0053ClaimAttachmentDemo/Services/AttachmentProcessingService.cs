@@ -162,7 +162,7 @@ public partial class AttachmentProcessingService(
         await db.SaveChangesAsync();
 
         return await RunCoreAsync(attachment,
-            doc.FileName, "text/plain", fileSizeBytes,
+            doc.FileName, "text/xml", fileSizeBytes,
             doc.ProviderNPI, doc.PatientName, doc.ServiceDate, doc.DocumentType);
     }
 
