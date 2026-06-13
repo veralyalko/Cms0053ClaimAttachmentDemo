@@ -218,8 +218,9 @@ public partial class AttachmentProcessingService(
         var warnings = new List<string>();
 
         await CheckDuplicatesAsync(attachment, providerNPI, patientName, serviceDate, documentType, errors, warnings);
-        Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
-            errors, warnings);
+        Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, attachment.PatientDOB,
+            serviceDate, documentType, errors, warnings);
+        ValidateMagicBytes(fileStorage.GetFilePath(attachment.StoredFileName), contentType, errors);
         ValidateNpi(providerNPI, errors);
 
         // C-CDA structural, template, and identity validation for XML submissions
@@ -347,8 +348,8 @@ public partial class AttachmentProcessingService(
 
     private static void Validate(
         string fileName, string contentType, long fileSizeBytes,
-        string providerNPI, string patientName, DateOnly serviceDate, string documentType,
-        List<string> errors, List<string> warnings)
+        string providerNPI, string patientName, DateOnly? patientDOB, DateOnly serviceDate,
+        string documentType, List<string> errors, List<string> warnings)
     {
         if (fileSizeBytes == 0)
             errors.Add("File is empty.");
@@ -369,6 +370,50 @@ public partial class AttachmentProcessingService(
             errors.Add("Service date is more than 2 years ago (timely filing limit exceeded).");
         if (string.IsNullOrWhiteSpace(documentType))
             errors.Add("Document type is required.");
+
+        if (patientDOB.HasValue)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            if (patientDOB.Value > today)
+                errors.Add("Patient date of birth cannot be in the future.");
+            else if (patientDOB.Value < today.AddYears(-150))
+                errors.Add("Patient date of birth is not plausible (more than 150 years ago).");
+            if (patientDOB.Value > serviceDate)
+                errors.Add("Patient date of birth cannot be after the service date.");
+        }
+    }
+
+    private static void ValidateMagicBytes(string filePath, string contentType, List<string> errors)
+    {
+        if (contentType is "text/plain" or "text/xml" or "application/xml")
+            return;
+
+        Span<byte> header = stackalloc byte[8];
+        int read;
+        try
+        {
+            using var fs = File.OpenRead(filePath);
+            read = fs.Read(header);
+        }
+        catch { return; }
+
+        if (read < 4) return;
+
+        var ok = contentType switch
+        {
+            "application/pdf" => header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46,
+            "image/jpeg"      => header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+            "image/png"       => read >= 8
+                                 && header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47
+                                 && header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A,
+            "image/tiff"      => (header[0] == 0x49 && header[1] == 0x49 && header[2] == 0x2A && header[3] == 0x00)
+                              || (header[0] == 0x4D && header[1] == 0x4D && header[2] == 0x00 && header[3] == 0x2A),
+            _                 => true
+        };
+
+        if (!ok)
+            errors.Add($"File content does not match the declared MIME type '{contentType}'. " +
+                       "The file may be corrupt or its extension mislabeled.");
     }
 
     private static void ValidateCcda(
@@ -443,6 +488,17 @@ public partial class AttachmentProcessingService(
                     errors.Add($"C-CDA template: required section '{display}' (LOINC {code}) is missing.");
             }
         }
+
+        // Section code system: each coded section should declare the LOINC OID.
+        var nonLoinc = doc.Descendants(CdaNs + "section")
+            .Select(s => s.Element(CdaNs + "code"))
+            .Where(c => c?.Attribute("code") is not null
+                     && c.Attribute("codeSystem")?.Value != "2.16.840.1.113883.6.1")
+            .Select(c => c!.Attribute("code")!.Value)
+            .ToList();
+        if (nonLoinc.Count > 0)
+            warnings.Add($"C-CDA: section code(s) [{string.Join(", ", nonLoinc)}] do not declare " +
+                         "the LOINC codeSystem OID (2.16.840.1.113883.6.1).");
 
         // Identity cross-checks: C-CDA content vs submitted metadata
         var patientEl = doc.Root
