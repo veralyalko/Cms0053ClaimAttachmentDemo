@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Cms0053ClaimAttachmentDemo.Data;
 using Cms0053ClaimAttachmentDemo.Models;
 
@@ -35,8 +36,11 @@ public partial class AttachmentProcessingService(
 {
     private static readonly HashSet<string> AllowedMimeTypes =
     [
-        "application/pdf", "image/jpeg", "image/png", "image/tiff", "text/plain"
+        "application/pdf", "image/jpeg", "image/png", "image/tiff", "text/plain",
+        "text/xml", "application/xml"
     ];
+
+    private static readonly XNamespace CdaNs = "urn:hl7-org:v3";
 
     // [X12-275-PLACEHOLDER] In production, this method accepts a parsed X12 275 Transaction Set
     // envelope instead of an IFormFile + metadata. The binary attachment and loop data segments
@@ -138,7 +142,7 @@ public partial class AttachmentProcessingService(
             FileName       = doc.FileName,
             StoredFileName = storedFileName,
             FileSizeBytes  = fileSizeBytes,
-            ContentType    = "text/plain",
+            ContentType    = "text/xml",
             FileHash       = fileHash,
             SubmittedBy    = submittedBy,
             SubmittedAt    = DateTime.UtcNow,
@@ -177,6 +181,10 @@ public partial class AttachmentProcessingService(
         var warnings = new List<string>();
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
             errors, warnings);
+
+        // C-CDA structural validation for XML submissions
+        if (contentType is "text/xml" or "application/xml")
+            ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), errors, warnings);
 
         db.AttachmentValidationResults.Add(new AttachmentValidationResult
         {
@@ -276,6 +284,50 @@ public partial class AttachmentProcessingService(
             errors.Add("Service date is more than 2 years ago (timely filing limit exceeded).");
         if (string.IsNullOrWhiteSpace(documentType))
             errors.Add("Document type is required.");
+    }
+
+    private static void ValidateCcda(string filePath, List<string> errors, List<string> warnings)
+    {
+        XDocument doc;
+        try
+        {
+            doc = XDocument.Load(filePath);
+        }
+        catch (Exception ex)
+        {
+            errors.Add($"XML is not well-formed: {ex.Message}");
+            return;
+        }
+
+        if (doc.Root is null || doc.Root.Name.LocalName != "ClinicalDocument")
+        {
+            errors.Add("Document is not a CDA ClinicalDocument. Root element must be <ClinicalDocument>.");
+            return;
+        }
+
+        if (doc.Root.Name.Namespace != CdaNs)
+        {
+            errors.Add($"ClinicalDocument is not in the HL7 CDA namespace (urn:hl7-org:v3). Found: {doc.Root.Name.Namespace}");
+            return;
+        }
+
+        // Required CDA R2 header elements
+        if (doc.Root.Element(CdaNs + "recordTarget") is null)
+            errors.Add("C-CDA: missing required <recordTarget> element.");
+        if (doc.Root.Element(CdaNs + "author") is null)
+            errors.Add("C-CDA: missing required <author> element.");
+        if (doc.Root.Element(CdaNs + "custodian") is null)
+            errors.Add("C-CDA: missing required <custodian> element.");
+        if (doc.Root.Element(CdaNs + "code") is null)
+            errors.Add("C-CDA: missing required document type <code> element (LOINC).");
+        if (doc.Root.Element(CdaNs + "effectiveTime") is null)
+            errors.Add("C-CDA: missing required <effectiveTime> element.");
+
+        // US Realm Header template — warning only since some valid docs omit it
+        var hasUsRealmTemplate = doc.Root.Elements(CdaNs + "templateId")
+            .Any(t => t.Attribute("root")?.Value == "2.16.840.1.113883.10.20.22.1.1");
+        if (!hasUsRealmTemplate)
+            warnings.Add("C-CDA: US Realm Header templateId (2.16.840.1.113883.10.20.22.1.1) not found. Document may not be C-CDA R2.1 compliant.");
     }
 
     [GeneratedRegex(@"^\d{10}$")]

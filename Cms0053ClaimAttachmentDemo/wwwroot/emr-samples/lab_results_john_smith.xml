@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:sdtc="urn:hl7-org:sdtc">
+
+  <realmCode code="US"/>
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+
+  <!-- C-CDA R2.1 US Realm Header -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <!-- Results Section (laboratory report) -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.14" extension="2015-08-01"/>
+
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="LAB-2025-0001"/>
+  <code code="11502-2" codeSystem="2.16.840.1.113883.6.1"
+        codeSystemName="LOINC" displayName="Laboratory report"/>
+  <title>Laboratory Results Report — John Smith</title>
+  <effectiveTime value="20251015"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
+  <languageCode code="en-US"/>
+
+  <recordTarget>
+    <patientRole>
+      <id extension="DEMO-JS-001" root="2.16.840.1.113883.19.5"/>
+      <addr use="HP">
+        <streetAddressLine>123 Maple Street</streetAddressLine>
+        <city>Springfield</city>
+        <state>IL</state>
+        <postalCode>62701</postalCode>
+        <country>US</country>
+      </addr>
+      <telecom use="HP" value="tel:555-201-0001"/>
+      <patient>
+        <name use="L">
+          <given>John</given>
+          <family>Smith</family>
+        </name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
+        <birthTime value="19750315"/>
+        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <languageCommunication>
+          <languageCode code="en-US"/>
+          <preferenceInd value="true"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+
+  <author>
+    <time value="20251015"/>
+    <assignedAuthor>
+      <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+      <assignedPerson>
+        <name>
+          <prefix>Dr.</prefix>
+          <given>Anika</given>
+          <family>Patel</family>
+          <suffix>MD</suffix>
+        </name>
+      </assignedPerson>
+      <representedOrganization>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <name>Metro Health Clinic</name>
+        <telecom use="WP" value="tel:555-200-1000"/>
+        <addr use="WP">
+          <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
+          <city>Springfield</city>
+          <state>IL</state>
+          <postalCode>62702</postalCode>
+          <country>US</country>
+        </addr>
+      </representedOrganization>
+    </assignedAuthor>
+  </author>
+
+  <custodian>
+    <assignedCustodian>
+      <representedCustodianOrganization>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <name>Metro Health Clinic</name>
+        <telecom use="WP" value="tel:555-200-1000"/>
+        <addr use="WP">
+          <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
+          <city>Springfield</city>
+          <state>IL</state>
+          <postalCode>62702</postalCode>
+          <country>US</country>
+        </addr>
+      </representedCustodianOrganization>
+    </assignedCustodian>
+  </custodian>
+
+  <component>
+    <structuredBody>
+
+      <!-- Results Section LOINC 30954-2 -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.3.1" extension="2015-08-01"/>
+          <code code="30954-2" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Relevant diagnostic tests/laboratory data Narrative"/>
+          <title>Laboratory Results</title>
+          <text>
+            <paragraph>
+              <content styleCode="Bold">Patient:</content> John Smith | DOB: 03/15/1975 | MRN: DEMO-JS-001
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Order Date:</content> 10/15/2025 |
+              <content styleCode="Bold">Report Date:</content> 10/16/2025 |
+              <content styleCode="Bold">Ordering Provider:</content> Dr. Anika Patel, MD
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Indication:</content> Low back pain (ICD-10: M54.5).
+              Labs ordered to rule out systemic or inflammatory cause.
+            </paragraph>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Test</th><th>Result</th><th>Reference Range</th><th>Flag</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>WBC</td><td>7.2 x10³/µL</td><td>4.5–11.0</td><td>Normal</td></tr>
+                <tr><td>RBC</td><td>4.85 x10⁶/µL</td><td>4.5–5.5</td><td>Normal</td></tr>
+                <tr><td>Hemoglobin</td><td>14.8 g/dL</td><td>13.5–17.5</td><td>Normal</td></tr>
+                <tr><td>Hematocrit</td><td>44.2%</td><td>41–53</td><td>Normal</td></tr>
+                <tr><td>Platelets</td><td>224 x10³/µL</td><td>150–400</td><td>Normal</td></tr>
+                <tr><td>Glucose</td><td>98 mg/dL</td><td>70–100</td><td>Normal</td></tr>
+                <tr><td>BUN</td><td>18 mg/dL</td><td>7–20</td><td>Normal</td></tr>
+                <tr><td>Creatinine</td><td>0.9 mg/dL</td><td>0.7–1.2</td><td>Normal</td></tr>
+                <tr><td>Sodium</td><td>139 mEq/L</td><td>136–145</td><td>Normal</td></tr>
+                <tr><td>Potassium</td><td>4.1 mEq/L</td><td>3.5–5.1</td><td>Normal</td></tr>
+                <tr><td>ESR</td><td>12 mm/hr</td><td>0–20</td><td>Normal</td></tr>
+                <tr><td>CRP</td><td>0.4 mg/L</td><td>0.0–1.0</td><td>Normal</td></tr>
+              </tbody>
+            </table>
+            <paragraph>
+              <content styleCode="Bold">Interpretation:</content>
+              All values within normal limits. No evidence of inflammatory, infectious, or metabolic
+              etiology for low back pain. Results consistent with mechanical low back pain (M54.5).
+            </paragraph>
+          </text>
+          <!-- Results Organizer -->
+          <entry typeCode="DRIV">
+            <organizer classCode="BATTERY" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.1" extension="2015-08-01"/>
+              <id root="2.16.840.1.113883.19.5.99999.2" extension="LAB-ORG-001"/>
+              <code code="58410-2" codeSystem="2.16.840.1.113883.6.1"
+                    codeSystemName="LOINC" displayName="CBC panel - Blood by Automated count"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20251015"/>
+              <component>
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.22.4.2" extension="2015-08-01"/>
+                  <id root="2.16.840.1.113883.19.5.99999.2" extension="OBS-WBC-001"/>
+                  <code code="6690-2" codeSystem="2.16.840.1.113883.6.1"
+                        codeSystemName="LOINC" displayName="WBC [#/volume] in Blood by Automated count"/>
+                  <statusCode code="completed"/>
+                  <effectiveTime value="20251015"/>
+                  <value xsi:type="PQ" value="7.2" unit="10*3/uL"/>
+                  <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83" displayName="Normal"/>
+                  <referenceRange>
+                    <observationRange>
+                      <value xsi:type="IVL_PQ">
+                        <low value="4.5" unit="10*3/uL"/>
+                        <high value="11.0" unit="10*3/uL"/>
+                      </value>
+                    </observationRange>
+                  </referenceRange>
+                </observation>
+              </component>
+            </organizer>
+          </entry>
+        </section>
+      </component>
+
+      <!-- Assessment and Plan Section LOINC 51847-2 -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09"/>
+          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Evaluation + Plan note"/>
+          <title>Assessment and Plan</title>
+          <text>
+            <paragraph>
+              <content styleCode="Bold">Assessment:</content>
+              Low back pain (M54.5) — mechanical etiology, laboratory workup negative for systemic cause.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Plan:</content>
+              Continue conservative management. NSAIDs as needed for pain. Physical therapy referral
+              placed. Follow-up in 6 weeks or sooner if symptoms worsen.
+            </paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <act classCode="ACT" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.202" extension="2016-11-01"/>
+              <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"
+                    codeSystemName="LOINC" displayName="Summarization of episode note"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20251015"/>
+            </act>
+          </entry>
+        </section>
+      </component>
+
+    </structuredBody>
+  </component>
+
+</ClinicalDocument>

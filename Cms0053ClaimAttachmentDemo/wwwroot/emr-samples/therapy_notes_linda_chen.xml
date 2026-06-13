@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:sdtc="urn:hl7-org:sdtc">
+
+  <realmCode code="US"/>
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+
+  <!-- C-CDA R2.1 US Realm Header -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <!-- Progress Note -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.9" extension="2015-08-01"/>
+
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="PT-2025-0001"/>
+  <code code="11514-3" codeSystem="2.16.840.1.113883.6.1"
+        codeSystemName="LOINC" displayName="Physical therapy procedure note"/>
+  <title>Physical Therapy Notes — Linda Chen</title>
+  <effectiveTime value="20251210"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
+  <languageCode code="en-US"/>
+
+  <recordTarget>
+    <patientRole>
+      <id extension="DEMO-LC-005" root="2.16.840.1.113883.19.5"/>
+      <addr use="HP">
+        <streetAddressLine>890 Riverside Drive</streetAddressLine>
+        <city>Riverside</city>
+        <state>CA</state>
+        <postalCode>92503</postalCode>
+        <country>US</country>
+      </addr>
+      <telecom use="HP" value="tel:555-202-0005"/>
+      <patient>
+        <name use="L">
+          <given>Linda</given>
+          <family>Chen</family>
+        </name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+        <birthTime value="19900514"/>
+        <raceCode code="2028-9" codeSystem="2.16.840.1.113883.6.238" displayName="Asian"/>
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <languageCommunication>
+          <languageCode code="en-US"/>
+          <preferenceInd value="true"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+
+  <author>
+    <time value="20251210"/>
+    <assignedAuthor>
+      <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+      <assignedPerson>
+        <name>
+          <prefix>Dr.</prefix>
+          <given>Marcus</given>
+          <family>Rodriguez</family>
+          <suffix>MD</suffix>
+        </name>
+      </assignedPerson>
+      <representedOrganization>
+        <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+        <name>Riverside Family Medicine</name>
+        <telecom use="WP" value="tel:555-202-2000"/>
+        <addr use="WP">
+          <streetAddressLine>100 Riverside Medical Plaza</streetAddressLine>
+          <city>Riverside</city>
+          <state>CA</state>
+          <postalCode>92502</postalCode>
+          <country>US</country>
+        </addr>
+      </representedOrganization>
+    </assignedAuthor>
+  </author>
+
+  <custodian>
+    <assignedCustodian>
+      <representedCustodianOrganization>
+        <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+        <name>Riverside Family Medicine</name>
+        <telecom use="WP" value="tel:555-202-2000"/>
+        <addr use="WP">
+          <streetAddressLine>100 Riverside Medical Plaza</streetAddressLine>
+          <city>Riverside</city>
+          <state>CA</state>
+          <postalCode>92502</postalCode>
+          <country>US</country>
+        </addr>
+      </representedCustodianOrganization>
+    </assignedCustodian>
+  </custodian>
+
+  <component>
+    <structuredBody>
+
+      <!-- Subjective Section -->
+      <component>
+        <section>
+          <code code="61150-9" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Subjective"/>
+          <title>Subjective</title>
+          <text>
+            <paragraph>
+              Linda Chen is a 35-year-old female referred for physical therapy for
+              management of gastroesophageal reflux disease (GERD, K21.0) and associated
+              musculoskeletal findings including postural dysfunction contributing to
+              increased abdominal pressure and symptom exacerbation.
+            </paragraph>
+            <paragraph>
+              Patient reports persistent heartburn (6/10 severity), regurgitation after meals,
+              and mid-thoracic back pain (4/10) which she attributes to prolonged seated posture
+              at her desk job. Symptoms worsen with bending, heavy lifting, and lying flat.
+              Currently on pantoprazole 40 mg daily with partial relief.
+            </paragraph>
+            <paragraph>
+              Patient denies dysphagia, odynophagia, hematemesis, or unintentional weight loss.
+              No prior surgical history. BMI 22.1. Non-smoker, alcohol use: occasional.
+            </paragraph>
+          </text>
+        </section>
+      </component>
+
+      <!-- Objective / Physical Findings -->
+      <component>
+        <section>
+          <code code="61149-1" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Objective"/>
+          <title>Objective — Physical Therapy Assessment</title>
+          <text>
+            <paragraph><content styleCode="Bold">Posture Assessment:</content>
+              Forward head posture (+3 cm anterior translation), rounded shoulders,
+              increased thoracic kyphosis. Lumbar lordosis flattened in sitting.
+            </paragraph>
+            <paragraph><content styleCode="Bold">Range of Motion — Thoracic Spine:</content>
+              Flexion 40° (normal 45°), Extension 20° (normal 25°),
+              Lateral Flexion L/R: 25°/25° (normal 25°/25°).
+            </paragraph>
+            <paragraph><content styleCode="Bold">Diaphragmatic Breathing:</content>
+              Paradoxical breathing pattern noted on initial assessment.
+              Shallow thoracic breathing at rest. Limited diaphragmatic excursion.
+            </paragraph>
+            <paragraph><content styleCode="Bold">Core Strength (MMT):</content>
+              Transverse abdominis 3+/5. Multifidus 4/5 bilateral.
+            </paragraph>
+            <paragraph><content styleCode="Bold">Functional Tests:</content>
+              Symptom provocation with Valsalva maneuver. Forward bending reproduces
+              heartburn within 30 seconds.
+            </paragraph>
+          </text>
+        </section>
+      </component>
+
+      <!-- Assessment and Plan -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09"/>
+          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Evaluation + Plan note"/>
+          <title>Assessment and Plan</title>
+          <text>
+            <paragraph>
+              <content styleCode="Bold">Diagnosis:</content>
+              GERD (K21.0) with contributing postural dysfunction and diaphragmatic dysfunction.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Physical Therapy Goals (6-week plan):</content>
+            </paragraph>
+            <list>
+              <item>Improve diaphragmatic breathing mechanics to reduce intra-abdominal pressure.</item>
+              <item>Correct forward head posture and thoracic kyphosis.</item>
+              <item>Strengthen core musculature (transverse abdominis, multifidus).</item>
+              <item>Patient education on ergonomics and meal timing.</item>
+              <item>Target: 50% reduction in GERD symptom frequency within 6 weeks.</item>
+            </list>
+            <paragraph>
+              <content styleCode="Bold">Treatment This Session:</content>
+              Diaphragmatic breathing retraining (20 min). Postural correction exercises:
+              thoracic extension over foam roller (3x10). Chin tucks (3x15).
+              Manual therapy: thoracic spine joint mobilization grades I-II.
+              Patient education: eating posture, meal-to-bed interval (&gt;3 hours).
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Plan:</content>
+              PT 2x/week x 6 weeks. Coordinate with referring provider Dr. Rodriguez.
+              Re-evaluate in 3 weeks for progress toward goals.
+            </paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.4" extension="2015-08-01"/>
+              <id root="2.16.840.1.113883.19.5.99999.5" extension="PROB-LC-001"/>
+              <code code="55607006" codeSystem="2.16.840.1.113883.6.96"
+                    codeSystemName="SNOMED CT" displayName="Problem"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20251210"/>
+              <value xsi:type="CD" code="K21.0" codeSystem="2.16.840.1.113883.6.90"
+                     codeSystemName="ICD-10-CM"
+                     displayName="Gastro-esophageal reflux disease with esophagitis"/>
+            </observation>
+          </entry>
+        </section>
+      </component>
+
+    </structuredBody>
+  </component>
+
+</ClinicalDocument>

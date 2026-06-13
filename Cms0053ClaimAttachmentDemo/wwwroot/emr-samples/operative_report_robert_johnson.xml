@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:sdtc="urn:hl7-org:sdtc">
+
+  <realmCode code="US"/>
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+
+  <!-- C-CDA R2.1 US Realm Header -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <!-- Operative Note -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.7" extension="2015-08-01"/>
+
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="OP-2025-0001"/>
+  <code code="11504-8" codeSystem="2.16.840.1.113883.6.1"
+        codeSystemName="LOINC" displayName="Surgical operation note"/>
+  <title>Operative Report — Robert Johnson</title>
+  <effectiveTime value="20250928"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
+  <languageCode code="en-US"/>
+
+  <recordTarget>
+    <patientRole>
+      <id extension="DEMO-RJ-002" root="2.16.840.1.113883.19.5"/>
+      <addr use="HP">
+        <streetAddressLine>789 Oak Avenue</streetAddressLine>
+        <city>Riverside</city>
+        <state>CA</state>
+        <postalCode>92501</postalCode>
+        <country>US</country>
+      </addr>
+      <telecom use="HP" value="tel:555-202-0002"/>
+      <patient>
+        <name use="L">
+          <given>Robert</given>
+          <family>Johnson</family>
+        </name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
+        <birthTime value="19601201"/>
+        <raceCode code="2054-5" codeSystem="2.16.840.1.113883.6.238" displayName="Black or African American"/>
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <languageCommunication>
+          <languageCode code="en-US"/>
+          <preferenceInd value="true"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+
+  <author>
+    <time value="20250928"/>
+    <assignedAuthor>
+      <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+      <assignedPerson>
+        <name>
+          <prefix>Dr.</prefix>
+          <given>Marcus</given>
+          <family>Rodriguez</family>
+          <suffix>MD, FACS</suffix>
+        </name>
+      </assignedPerson>
+      <representedOrganization>
+        <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+        <name>Riverside Family Medicine</name>
+        <telecom use="WP" value="tel:555-202-2000"/>
+        <addr use="WP">
+          <streetAddressLine>100 Riverside Medical Plaza</streetAddressLine>
+          <city>Riverside</city>
+          <state>CA</state>
+          <postalCode>92502</postalCode>
+          <country>US</country>
+        </addr>
+      </representedOrganization>
+    </assignedAuthor>
+  </author>
+
+  <custodian>
+    <assignedCustodian>
+      <representedCustodianOrganization>
+        <id extension="9876543210" root="2.16.840.1.113883.4.6"/>
+        <name>Riverside Family Medicine</name>
+        <telecom use="WP" value="tel:555-202-2000"/>
+        <addr use="WP">
+          <streetAddressLine>100 Riverside Medical Plaza</streetAddressLine>
+          <city>Riverside</city>
+          <state>CA</state>
+          <postalCode>92502</postalCode>
+          <country>US</country>
+        </addr>
+      </representedCustodianOrganization>
+    </assignedCustodian>
+  </custodian>
+
+  <component>
+    <structuredBody>
+
+      <!-- Procedure Description Section LOINC 29554-3 -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.7.12"/>
+          <code code="29554-3" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Procedure description Narrative"/>
+          <title>Preoperative Diagnosis and Procedure</title>
+          <text>
+            <paragraph>
+              <content styleCode="Bold">Date of Operation:</content> 09/28/2025
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Surgeon:</content> Dr. Marcus Rodriguez, MD, FACS
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Preoperative Diagnosis:</content>
+              Type 2 diabetes mellitus without complications (E11.9). Scheduled for
+              minor office procedure: diabetic foot care and nail debridement.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Procedure Performed:</content>
+              Debridement of diabetic foot lesion, right great toe. Nail trimming
+              and callus debridement performed under sterile conditions.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Anesthesia:</content> Local, 1% lidocaine without epinephrine.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Estimated Blood Loss:</content> Minimal (&lt;5 mL).
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Specimens:</content> None.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Complications:</content> None.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Findings:</content>
+              Thickened mycotic nails bilaterally. Hyperkeratotic lesion plantar surface right
+              great toe approximately 1.2 cm diameter, grade 1 per Wagner classification.
+              Adequate peripheral pulses palpable. No signs of active infection.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Postoperative Plan:</content>
+              Wound care instructions provided. Follow-up in 2 weeks. Continue current
+              diabetes management (metformin 1000 mg BID, lifestyle modification).
+              HbA1c check ordered — last value 7.4% (03/2025).
+            </paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <procedure classCode="PROC" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.14" extension="2014-06-09"/>
+              <id root="2.16.840.1.113883.19.5.99999.3" extension="PROC-2025-0001"/>
+              <code code="11056-9" codeSystem="2.16.840.1.113883.6.1"
+                    codeSystemName="LOINC" displayName="Podiatry note"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20250928"/>
+              <targetSiteCode code="48856004" codeSystem="2.16.840.1.113883.6.96"
+                              codeSystemName="SNOMED CT" displayName="Skin structure of right great toe"/>
+            </procedure>
+          </entry>
+        </section>
+      </component>
+
+      <!-- Postoperative Diagnosis LOINC 10219-4 -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.7.14"/>
+          <code code="10219-4" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Surgical operation note postoperative Dx"/>
+          <title>Postoperative Diagnosis</title>
+          <text>
+            <paragraph>
+              Type 2 diabetes mellitus without complications (ICD-10: E11.9).
+              Diabetic foot lesion, right great toe, Wagner grade 1 (ICD-10: L97.519).
+            </paragraph>
+          </text>
+        </section>
+      </component>
+
+    </structuredBody>
+  </component>
+
+</ClinicalDocument>

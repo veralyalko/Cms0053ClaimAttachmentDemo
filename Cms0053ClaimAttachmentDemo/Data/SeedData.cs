@@ -95,6 +95,7 @@ public static class SeedData
 
         // EMR documents match claims 1–5 by NPI + patient name + service date.
         // Used in Workflow 3 (Direct/EMR) to simulate selecting a document from an EHR.
+        // C-CDA R2.1 XML documents — structurally valid, demo data only, no real PHI.
         var emrDocs = new List<EmrDocument>
         {
             new()
@@ -105,7 +106,7 @@ public static class SeedData
                 PatientDOB   = new DateOnly(1975, 3, 15),
                 ProviderNPI  = "1234567890",
                 ServiceDate  = new DateOnly(2025, 10, 15),
-                FileName     = "lab_results_john_smith.txt"
+                FileName     = "lab_results_john_smith.xml"
             },
             new()
             {
@@ -115,7 +116,7 @@ public static class SeedData
                 PatientDOB   = new DateOnly(1960, 12, 1),
                 ProviderNPI  = "9876543210",
                 ServiceDate  = new DateOnly(2025, 9, 28),
-                FileName     = "operative_report_robert_johnson.txt"
+                FileName     = "operative_report_robert_johnson.xml"
             },
             new()
             {
@@ -125,7 +126,7 @@ public static class SeedData
                 PatientDOB   = new DateOnly(1955, 8, 30),
                 ProviderNPI  = "5551234567",
                 ServiceDate  = new DateOnly(2025, 11, 20),
-                FileName     = "xray_report_james_wilson.txt"
+                FileName     = "xray_report_james_wilson.xml"
             },
             new()
             {
@@ -135,7 +136,7 @@ public static class SeedData
                 PatientDOB   = new DateOnly(1982, 7, 22),
                 ProviderNPI  = "1234567890",
                 ServiceDate  = new DateOnly(2025, 11, 3),
-                FileName     = "office_visit_maria_garcia.txt"
+                FileName     = "office_visit_maria_garcia.xml"
             },
             new()
             {
@@ -145,7 +146,7 @@ public static class SeedData
                 PatientDOB   = new DateOnly(1990, 5, 14),
                 ProviderNPI  = "9876543210",
                 ServiceDate  = new DateOnly(2025, 12, 10),
-                FileName     = "therapy_notes_linda_chen.txt"
+                FileName     = "therapy_notes_linda_chen.xml"
             }
         };
 

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:sdtc="urn:hl7-org:sdtc">
+
+  <realmCode code="US"/>
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+
+  <!-- C-CDA R2.1 US Realm Header -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <!-- Diagnostic Imaging Report -->
+  <templateId root="2.16.840.1.113883.10.20.22.1.5" extension="2015-08-01"/>
+
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="RAD-2025-0001"/>
+  <code code="18748-4" codeSystem="2.16.840.1.113883.6.1"
+        codeSystemName="LOINC" displayName="Diagnostic imaging study"/>
+  <title>Radiology Report — James Wilson</title>
+  <effectiveTime value="20251120"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
+  <languageCode code="en-US"/>
+
+  <recordTarget>
+    <patientRole>
+      <id extension="DEMO-JW-003" root="2.16.840.1.113883.19.5"/>
+      <addr use="HP">
+        <streetAddressLine>321 Valley Road</streetAddressLine>
+        <city>Valleytown</city>
+        <state>AZ</state>
+        <postalCode>85001</postalCode>
+        <country>US</country>
+      </addr>
+      <telecom use="HP" value="tel:555-203-0003"/>
+      <patient>
+        <name use="L">
+          <given>James</given>
+          <family>Wilson</family>
+        </name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
+        <birthTime value="19550830"/>
+        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <languageCommunication>
+          <languageCode code="en-US"/>
+          <preferenceInd value="true"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+
+  <author>
+    <time value="20251120"/>
+    <assignedAuthor>
+      <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+      <assignedPerson>
+        <name>
+          <prefix>Dr.</prefix>
+          <given>Thomas</given>
+          <family>Chen</family>
+          <suffix>MD, FAAOS</suffix>
+        </name>
+      </assignedPerson>
+      <representedOrganization>
+        <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+        <name>Valley Orthopedic Group</name>
+        <telecom use="WP" value="tel:555-203-3000"/>
+        <addr use="WP">
+          <streetAddressLine>200 Orthopedic Way</streetAddressLine>
+          <city>Valleytown</city>
+          <state>AZ</state>
+          <postalCode>85002</postalCode>
+          <country>US</country>
+        </addr>
+      </representedOrganization>
+    </assignedAuthor>
+  </author>
+
+  <custodian>
+    <assignedCustodian>
+      <representedCustodianOrganization>
+        <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+        <name>Valley Orthopedic Group</name>
+        <telecom use="WP" value="tel:555-203-3000"/>
+        <addr use="WP">
+          <streetAddressLine>200 Orthopedic Way</streetAddressLine>
+          <city>Valleytown</city>
+          <state>AZ</state>
+          <postalCode>85002</postalCode>
+          <country>US</country>
+        </addr>
+      </representedCustodianOrganization>
+    </assignedCustodian>
+  </custodian>
+
+  <component>
+    <structuredBody>
+
+      <!-- Radiology Study LOINC 18782-3 -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.65" extension="2016-11-01"/>
+          <code code="18782-3" codeSystem="2.16.840.1.113883.6.1"
+                codeSystemName="LOINC" displayName="Radiology Study observation (narrative)"/>
+          <title>Diagnostic Imaging Report</title>
+          <text>
+            <paragraph>
+              <content styleCode="Bold">Exam Type:</content> X-Ray, Right Knee (3 views: AP, Lateral, Sunrise)
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Date of Exam:</content> 11/20/2025
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Ordering Physician:</content> Dr. Thomas Chen, MD, FAAOS
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Clinical Indication:</content>
+              Chronic right knee pain, worsening with weight-bearing activity.
+              Rule out osteoarthritis (ICD-10: M17.11).
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Technique:</content>
+              Three standard views of the right knee obtained standing and non-standing.
+              Adequate technical quality. No prior studies available for comparison.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Findings:</content>
+            </paragraph>
+            <list>
+              <item>Moderate to severe joint space narrowing in the medial compartment of the right knee.</item>
+              <item>Prominent osteophyte formation at the medial tibial plateau and medial femoral condyle.</item>
+              <item>Mild subchondral sclerosis of the medial tibial plateau.</item>
+              <item>No acute fracture or dislocation identified.</item>
+              <item>Patellofemoral compartment: mild joint space narrowing, small superior patellar osteophyte.</item>
+              <item>Lateral compartment: preserved joint space.</item>
+              <item>Soft tissue: no calcifications noted.</item>
+            </list>
+            <paragraph>
+              <content styleCode="Bold">Impression:</content>
+              Moderate-to-severe primary osteoarthritis of the right knee, predominantly medial
+              compartment involvement. Kellgren-Lawrence Grade III–IV. Findings correlate with
+              reported symptoms. Clinical correlation and orthopedic management recommended.
+            </paragraph>
+            <paragraph>
+              <content styleCode="Bold">Recommendation:</content>
+              Orthopedic consultation for consideration of corticosteroid injection versus
+              total knee arthroplasty evaluation based on clinical examination and functional
+              limitations.
+            </paragraph>
+          </text>
+          <entry typeCode="DRIV">
+            <observation classCode="OBS" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.6.2.12"/>
+              <code code="59776-5" codeSystem="2.16.840.1.113883.6.1"
+                    codeSystemName="LOINC" displayName="Procedure findings Narrative"/>
+              <statusCode code="completed"/>
+              <effectiveTime value="20251120"/>
+              <value xsi:type="ED" mediaType="text/plain">
+                Moderate-to-severe primary osteoarthritis right knee. Kellgren-Lawrence Grade III-IV.
+              </value>
+            </observation>
+          </entry>
+        </section>
+      </component>
+
+    </structuredBody>
+  </component>
+
+</ClinicalDocument>
