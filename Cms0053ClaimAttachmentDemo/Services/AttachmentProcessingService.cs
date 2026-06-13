@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Cms0053ClaimAttachmentDemo.Data;
 using Cms0053ClaimAttachmentDemo.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cms0053ClaimAttachmentDemo.Services;
 
@@ -204,6 +205,8 @@ public partial class AttachmentProcessingService(
 
         var errors = new List<string>();
         var warnings = new List<string>();
+
+        await CheckDuplicatesAsync(attachment, providerNPI, patientName, serviceDate, documentType, errors, warnings);
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, serviceDate, documentType,
             errors, warnings);
 
@@ -283,6 +286,39 @@ public partial class AttachmentProcessingService(
             ChangedAt         = DateTime.UtcNow,
             ChangedBy         = "System"
         });
+    }
+
+    private async Task CheckDuplicatesAsync(
+        ClaimAttachment attachment,
+        string providerNPI, string patientName, DateOnly serviceDate, string documentType,
+        List<string> errors, List<string> warnings)
+    {
+        // Identical file content (same SHA-256 hash) — hard error.
+        var hashMatch = await db.ClaimAttachments
+            .Where(a => a.FileHash == attachment.FileHash && a.Id != attachment.Id)
+            .OrderByDescending(a => a.CreatedAt)
+            .Select(a => new { a.Id, a.SubmittedAt })
+            .FirstOrDefaultAsync();
+
+        if (hashMatch is not null)
+            errors.Add($"Duplicate file: this exact document was already received " +
+                       $"(Attachment #{hashMatch.Id}, submitted {hashMatch.SubmittedAt:MM/dd/yyyy HH:mm} UTC).");
+
+        // Same provider + patient + service date + document type already accepted — warning only,
+        // since a legitimately different file may cover the same encounter.
+        var normalized = patientName.Trim().ToLower();
+        var metaCandidates = await db.ClaimAttachments
+            .Where(a => a.ProviderNPI == providerNPI
+                     && a.ServiceDate == serviceDate
+                     && a.DocumentType == documentType
+                     && a.Status == AttachmentStatus.Accepted
+                     && a.Id != attachment.Id)
+            .ToListAsync();
+
+        var metaMatch = metaCandidates.FirstOrDefault(a => a.PatientName.Trim().ToLower() == normalized);
+        if (metaMatch is not null)
+            warnings.Add($"Potential duplicate: an accepted {documentType} for this patient, " +
+                         $"provider NPI, and service date already exists (Attachment #{metaMatch.Id}).");
     }
 
     private static void Validate(
