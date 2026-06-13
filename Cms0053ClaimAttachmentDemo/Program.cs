@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "cms0053.db");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=cms0053.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
 builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddScoped<ClaimMatchingService>();
 builder.Services.AddScoped<AttachmentProcessingService>();
@@ -24,10 +25,7 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.MapStaticAssets();
