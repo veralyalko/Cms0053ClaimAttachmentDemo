@@ -1,28 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
-<ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:sdtc="urn:hl7-org:sdtc">
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdtc="urn:hl7-org:sdtc">
 
-  <realmCode code="US"/>
-  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+  <realmCode code="US" />
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040" />
 
   <!-- C-CDA R2.1 US Realm Header -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01" />
   <!-- Results Section (laboratory report) -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.14" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.14" extension="2015-08-01" />
 
-  <id root="2.16.840.1.113883.19.5.99999.1" extension="LAB-2025-0001"/>
-  <code code="11502-2" codeSystem="2.16.840.1.113883.6.1"
-        codeSystemName="LOINC" displayName="Laboratory report"/>
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="LAB-2025-0001" />
+  <code code="11502-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Laboratory report" />
   <title>Laboratory Results Report — John Smith</title>
-  <effectiveTime value="20251015"/>
-  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
-  <languageCode code="en-US"/>
+  <effectiveTime value="20251015" />
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal" />
+  <languageCode code="en-US" />
 
   <recordTarget>
     <patientRole>
-      <id extension="DEMO-JS-001" root="2.16.840.1.113883.19.5"/>
+      <id extension="DEMO-JS-001" root="2.16.840.1.113883.19.5" />
       <addr use="HP">
         <streetAddressLine>123 Maple Street</streetAddressLine>
         <city>Springfield</city>
@@ -30,28 +27,28 @@
         <postalCode>62701</postalCode>
         <country>US</country>
       </addr>
-      <telecom use="HP" value="tel:555-201-0001"/>
+      <telecom use="HP" value="tel:555-201-0001" />
       <patient>
         <name use="L">
           <given>John</given>
           <family>Smith</family>
         </name>
-        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
-        <birthTime value="19750315"/>
-        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
-        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male" />
+        <birthTime value="19750315" />
+        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White" />
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino" />
         <languageCommunication>
-          <languageCode code="en-US"/>
-          <preferenceInd value="true"/>
+          <languageCode code="en-US" />
+          <preferenceInd value="true" />
         </languageCommunication>
       </patient>
     </patientRole>
   </recordTarget>
 
   <author>
-    <time value="20251015"/>
+    <time value="20251015" />
     <assignedAuthor>
-      <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+      <id extension="1234567890" root="2.16.840.1.113883.4.6" />
       <assignedPerson>
         <name>
           <prefix>Dr.</prefix>
@@ -61,9 +58,9 @@
         </name>
       </assignedPerson>
       <representedOrganization>
-        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6" />
         <name>Metro Health Clinic</name>
-        <telecom use="WP" value="tel:555-200-1000"/>
+        <telecom use="WP" value="tel:555-200-1000" />
         <addr use="WP">
           <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
           <city>Springfield</city>
@@ -78,9 +75,9 @@
   <custodian>
     <assignedCustodian>
       <representedCustodianOrganization>
-        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6" />
         <name>Metro Health Clinic</name>
-        <telecom use="WP" value="tel:555-200-1000"/>
+        <telecom use="WP" value="tel:555-200-1000" />
         <addr use="WP">
           <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
           <city>Springfield</city>
@@ -98,9 +95,8 @@
       <!-- Results Section LOINC 30954-2 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.22.2.3.1" extension="2015-08-01"/>
-          <code code="30954-2" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Relevant diagnostic tests/laboratory data Narrative"/>
+          <templateId root="2.16.840.1.113883.10.20.22.2.3.1" extension="2015-08-01" />
+          <code code="30954-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Relevant diagnostic tests/laboratory data Narrative" />
           <title>Laboratory Results</title>
           <text>
             <paragraph>
@@ -145,27 +141,25 @@
           <!-- Results Organizer -->
           <entry typeCode="DRIV">
             <organizer classCode="BATTERY" moodCode="EVN">
-              <templateId root="2.16.840.1.113883.10.20.22.4.1" extension="2015-08-01"/>
-              <id root="2.16.840.1.113883.19.5.99999.2" extension="LAB-ORG-001"/>
-              <code code="58410-2" codeSystem="2.16.840.1.113883.6.1"
-                    codeSystemName="LOINC" displayName="CBC panel - Blood by Automated count"/>
-              <statusCode code="completed"/>
-              <effectiveTime value="20251015"/>
+              <templateId root="2.16.840.1.113883.10.20.22.4.1" extension="2015-08-01" />
+              <id root="2.16.840.1.113883.19.5.99999.2" extension="LAB-ORG-001" />
+              <code code="58410-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="CBC panel - Blood by Automated count" />
+              <statusCode code="completed" />
+              <effectiveTime value="20251015" />
               <component>
                 <observation classCode="OBS" moodCode="EVN">
-                  <templateId root="2.16.840.1.113883.10.20.22.4.2" extension="2015-08-01"/>
-                  <id root="2.16.840.1.113883.19.5.99999.2" extension="OBS-WBC-001"/>
-                  <code code="6690-2" codeSystem="2.16.840.1.113883.6.1"
-                        codeSystemName="LOINC" displayName="WBC [#/volume] in Blood by Automated count"/>
-                  <statusCode code="completed"/>
-                  <effectiveTime value="20251015"/>
-                  <value xsi:type="PQ" value="7.2" unit="10*3/uL"/>
-                  <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83" displayName="Normal"/>
+                  <templateId root="2.16.840.1.113883.10.20.22.4.2" extension="2015-08-01" />
+                  <id root="2.16.840.1.113883.19.5.99999.2" extension="OBS-WBC-001" />
+                  <code code="6690-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="WBC [#/volume] in Blood by Automated count" />
+                  <statusCode code="completed" />
+                  <effectiveTime value="20251015" />
+                  <value xsi:type="PQ" value="7.2" unit="10*3/uL" />
+                  <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83" displayName="Normal" />
                   <referenceRange>
                     <observationRange>
                       <value xsi:type="IVL_PQ">
-                        <low value="4.5" unit="10*3/uL"/>
-                        <high value="11.0" unit="10*3/uL"/>
+                        <low value="4.5" unit="10*3/uL" />
+                        <high value="11.0" unit="10*3/uL" />
                       </value>
                     </observationRange>
                   </referenceRange>
@@ -179,9 +173,8 @@
       <!-- Assessment and Plan Section LOINC 51847-2 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09"/>
-          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Evaluation + Plan note"/>
+          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09" />
+          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Evaluation + Plan note" />
           <title>Assessment and Plan</title>
           <text>
             <paragraph>
@@ -196,11 +189,10 @@
           </text>
           <entry typeCode="DRIV">
             <act classCode="ACT" moodCode="EVN">
-              <templateId root="2.16.840.1.113883.10.20.22.4.202" extension="2016-11-01"/>
-              <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"
-                    codeSystemName="LOINC" displayName="Summarization of episode note"/>
-              <statusCode code="completed"/>
-              <effectiveTime value="20251015"/>
+              <templateId root="2.16.840.1.113883.10.20.22.4.202" extension="2016-11-01" />
+              <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Summarization of episode note" />
+              <statusCode code="completed" />
+              <effectiveTime value="20251015" />
             </act>
           </entry>
         </section>
@@ -209,24 +201,5 @@
     </structuredBody>
   </component>
   <!-- DEMO: Enveloped XMLDSig electronic signature. SignatureValue is not cryptographically valid. -->
-  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
-    <SignedInfo>
-      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
-      <Reference URI="">
-        <Transforms>
-          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-        </Transforms>
-        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-        <DigestValue>DEMO-DIGEST-NOT-CRYPTOGRAPHICALLY-VALID</DigestValue>
-      </Reference>
-    </SignedInfo>
-    <SignatureValue>DEMO-RSA-SHA256-NOT-CRYPTOGRAPHICALLY-VALID-CMS0053-PROTOTYPE</SignatureValue>
-    <KeyInfo>
-      <X509Data>
-        <X509SubjectName>CN=Metro Health Clinic, OID.2.16.840.1.113883.4.6=1234567890, O=Metro Health Clinic, C=US</X509SubjectName>
-        <X509Certificate>DEMO-CERTIFICATE-NOT-REAL-CMS0053-PROTOTYPE</X509Certificate>
-      </X509Data>
-    </KeyInfo>
-  </Signature>
-</ClinicalDocument>
+  
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>ZDHG81DXKSWLXyo4xQaMR2m5TkR9YKT4ooGnkBOfGKw=</DigestValue></Reference></SignedInfo><SignatureValue>kHPOZjHJeeC+mDRoS3eS1Fwn4oB+fRlyKllpA+e/Kb669jCdgTX+lDwAbvirjHGdzhLd4jDyHmo4c9d+5W9bBnLP2gdfrUJAprMrs8+jMx4PAu5eua2UtGbVgUWH9yFqMW/Jeeu342GXzHQ/uN2vQykOj2PXZbpagvZlR52Iu6dZD2oseyNVcwNXkfTQUfMZNLqZN5I60B1YiyMG0ztXZjQ/vZ0yRDa2AnLV8Yqdjppx3zymaBdIWkDzKKH4Gd55CyckbFF5kSBb7tSH/hfBsX6AsWksUy+sFC+UlksFueQLzolGB/ko71Oo1xUctQZ82kr+Clii84kzzLoxgoehUg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDSTCCAjGgAwIBAgIJALcHFHIF3GhbMA0GCSqGSIb3DQEBCwUAMGQxCzAJBgNVBAYTAlVTMRwwGgYDVQQKExNNZXRybyBIZWFsdGggQ2xpbmljMRkwFwYJYIZIAYb5WwQGEwoxMjM0NTY3ODkwMRwwGgYDVQQDExNNZXRybyBIZWFsdGggQ2xpbmljMB4XDTI2MDYxMzAyNTIxOFoXDTI5MDYxNDAyNTIxOFowZDELMAkGA1UEBhMCVVMxHDAaBgNVBAoTE01ldHJvIEhlYWx0aCBDbGluaWMxGTAXBglghkgBhvlbBAYTCjEyMzQ1Njc4OTAxHDAaBgNVBAMTE01ldHJvIEhlYWx0aCBDbGluaWMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYzdVb3bcmddIl4bLxIL+v9rrdqb0Nh9xwKLQM0LG1qXpx8mBSjAuXDu7iRotSFoSppgB2Snuo/+4Q7QJRZ2vFkyk/SqW5H0eUC7A4D9asQpceu6ZqVbs3mUCKiD+/L/BuFqagbTELt8tPZaSE6Rcxeg+sEkCORjp6AaUeIvYN4bC94KetWwtttAkJgyiy/i2R6cQ6g+wGFzPDO8KP+SFcQj7yKBp09xNETixPXKJaia5/4+dVSpcb+3T/1teS8qnbYPll7K82eRbEveAAgWYUjlWLXArdy+A3IIDvKBwurRCdQH5tfE9O1RthsQCqZAryjQboH1kmFWuUqg/yAljJAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAFlkW4uWO6Zcxz6JvwfrGDOLT8emo14jhTx4nXGmY4ZngnbBtST9z67sXQDkIeCSw/DKJ5flG5Te08Bya1VX5+VH6H0zsy3U4iz6d2l8QIdN0MC6pko1o0FIFUwf+GJa01rvfH4hpuMO3Bu31Zr8L4Ik4ZILwDcqLHhu7NsGfaXYma60PEyuDj3b2pfT2zHkAkKzdLFuFiHfEX0Ope19ZZnsPPMRm7o5Bvw5o9QQMDHemb1QCdYfEfHxDEjHzErhEc5c7jdYxi0yb1r3svbZwcT2aRhH7Z9nwwXmtyR/fpeyi18uFyppRQoZEjC8jpa5+EyrpPKflFDBfhF3ZEmKuyY=</X509Certificate></X509Data></KeyInfo></Signature></ClinicalDocument>

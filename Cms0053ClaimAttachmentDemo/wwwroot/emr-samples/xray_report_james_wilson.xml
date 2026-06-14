@@ -1,28 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
-<ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:sdtc="urn:hl7-org:sdtc">
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdtc="urn:hl7-org:sdtc">
 
-  <realmCode code="US"/>
-  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+  <realmCode code="US" />
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040" />
 
   <!-- C-CDA R2.1 US Realm Header -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01" />
   <!-- Diagnostic Imaging Report -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.5" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.5" extension="2015-08-01" />
 
-  <id root="2.16.840.1.113883.19.5.99999.1" extension="RAD-2025-0001"/>
-  <code code="18748-4" codeSystem="2.16.840.1.113883.6.1"
-        codeSystemName="LOINC" displayName="Diagnostic imaging study"/>
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="RAD-2025-0001" />
+  <code code="18748-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Diagnostic imaging study" />
   <title>Radiology Report — James Wilson</title>
-  <effectiveTime value="20251120"/>
-  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
-  <languageCode code="en-US"/>
+  <effectiveTime value="20251120" />
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal" />
+  <languageCode code="en-US" />
 
   <recordTarget>
     <patientRole>
-      <id extension="DEMO-JW-003" root="2.16.840.1.113883.19.5"/>
+      <id extension="DEMO-JW-003" root="2.16.840.1.113883.19.5" />
       <addr use="HP">
         <streetAddressLine>321 Valley Road</streetAddressLine>
         <city>Valleytown</city>
@@ -30,28 +27,28 @@
         <postalCode>85001</postalCode>
         <country>US</country>
       </addr>
-      <telecom use="HP" value="tel:555-203-0003"/>
+      <telecom use="HP" value="tel:555-203-0003" />
       <patient>
         <name use="L">
           <given>James</given>
           <family>Wilson</family>
         </name>
-        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
-        <birthTime value="19550830"/>
-        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
-        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino"/>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male" />
+        <birthTime value="19550830" />
+        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White" />
+        <ethnicGroupCode code="2186-5" codeSystem="2.16.840.1.113883.6.238" displayName="Not Hispanic or Latino" />
         <languageCommunication>
-          <languageCode code="en-US"/>
-          <preferenceInd value="true"/>
+          <languageCode code="en-US" />
+          <preferenceInd value="true" />
         </languageCommunication>
       </patient>
     </patientRole>
   </recordTarget>
 
   <author>
-    <time value="20251120"/>
+    <time value="20251120" />
     <assignedAuthor>
-      <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+      <id extension="5551234567" root="2.16.840.1.113883.4.6" />
       <assignedPerson>
         <name>
           <prefix>Dr.</prefix>
@@ -61,9 +58,9 @@
         </name>
       </assignedPerson>
       <representedOrganization>
-        <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+        <id extension="5551234567" root="2.16.840.1.113883.4.6" />
         <name>Valley Orthopedic Group</name>
-        <telecom use="WP" value="tel:555-203-3000"/>
+        <telecom use="WP" value="tel:555-203-3000" />
         <addr use="WP">
           <streetAddressLine>200 Orthopedic Way</streetAddressLine>
           <city>Valleytown</city>
@@ -78,9 +75,9 @@
   <custodian>
     <assignedCustodian>
       <representedCustodianOrganization>
-        <id extension="5551234567" root="2.16.840.1.113883.4.6"/>
+        <id extension="5551234567" root="2.16.840.1.113883.4.6" />
         <name>Valley Orthopedic Group</name>
-        <telecom use="WP" value="tel:555-203-3000"/>
+        <telecom use="WP" value="tel:555-203-3000" />
         <addr use="WP">
           <streetAddressLine>200 Orthopedic Way</streetAddressLine>
           <city>Valleytown</city>
@@ -98,9 +95,8 @@
       <!-- Radiology Study LOINC 18782-3 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.22.2.65" extension="2016-11-01"/>
-          <code code="18782-3" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Radiology Study observation (narrative)"/>
+          <templateId root="2.16.840.1.113883.10.20.22.2.65" extension="2016-11-01" />
+          <code code="18782-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Radiology Study observation (narrative)" />
           <title>Diagnostic Imaging Report</title>
           <text>
             <paragraph>
@@ -149,11 +145,10 @@
           </text>
           <entry typeCode="DRIV">
             <observation classCode="OBS" moodCode="EVN">
-              <templateId root="2.16.840.1.113883.10.20.6.2.12"/>
-              <code code="59776-5" codeSystem="2.16.840.1.113883.6.1"
-                    codeSystemName="LOINC" displayName="Procedure findings Narrative"/>
-              <statusCode code="completed"/>
-              <effectiveTime value="20251120"/>
+              <templateId root="2.16.840.1.113883.10.20.6.2.12" />
+              <code code="59776-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Procedure findings Narrative" />
+              <statusCode code="completed" />
+              <effectiveTime value="20251120" />
               <value xsi:type="ED" mediaType="text/plain">
                 Moderate-to-severe primary osteoarthritis right knee. Kellgren-Lawrence Grade III-IV.
               </value>
@@ -165,24 +160,5 @@
     </structuredBody>
   </component>
   <!-- DEMO: Enveloped XMLDSig electronic signature. SignatureValue is not cryptographically valid. -->
-  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
-    <SignedInfo>
-      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
-      <Reference URI="">
-        <Transforms>
-          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-        </Transforms>
-        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-        <DigestValue>DEMO-DIGEST-NOT-CRYPTOGRAPHICALLY-VALID</DigestValue>
-      </Reference>
-    </SignedInfo>
-    <SignatureValue>DEMO-RSA-SHA256-NOT-CRYPTOGRAPHICALLY-VALID-CMS0053-PROTOTYPE</SignatureValue>
-    <KeyInfo>
-      <X509Data>
-        <X509SubjectName>CN=Valley Orthopedic Group, OID.2.16.840.1.113883.4.6=5551234567, O=Valley Orthopedic Group, C=US</X509SubjectName>
-        <X509Certificate>DEMO-CERTIFICATE-NOT-REAL-CMS0053-PROTOTYPE</X509Certificate>
-      </X509Data>
-    </KeyInfo>
-  </Signature>
-</ClinicalDocument>
+  
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>sWL2tAhJDd8wI8rTSH8KURSYUrKulT1fTBRadYsJs+E=</DigestValue></Reference></SignedInfo><SignatureValue>M2MBzbrDP5oy6ZPqEFZSa0znx8izinogEO+gCqa1KLmjTwC/VpvrrBX++oGkE5f7T4FFBqCheg+tFkMTJzDTmDOPwlXL0s2mjArtdrrD2k/crTr/tFt8D0oaMbkWUVB21FymDShp1ufYWkTqjOXoSaTYl+eKwskQfiCQJhQgj+MPUaWH9yP9QiytfUEXXDYZEpL1Zf3TkXE6GdfFHsNIXBRwa4veG/lP8lGwqO/SsO25n0gXm8swIrGg35sCBo/zU3jyGxbo3C59akh/a63XWEJxxQa1tpxfbAu3AtQQSotSeo0kKnjPleaxBB1KiMwwUYF8EJ0U/oxLH1cNOXgjXA==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDWTCCAkGgAwIBAgIJAJuDAdkIv+mjMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNVBAYTAlVTMSAwHgYDVQQKExdWYWxsZXkgT3J0aG9wZWRpYyBHcm91cDEZMBcGCWCGSAGG+VsEBhMKNTU1MTIzNDU2NzEgMB4GA1UEAxMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAwHhcNMjYwNjEzMDI1MjE4WhcNMjkwNjE0MDI1MjE4WjBsMQswCQYDVQQGEwJVUzEgMB4GA1UEChMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAxGTAXBglghkgBhvlbBAYTCjU1NTEyMzQ1NjcxIDAeBgNVBAMTF1ZhbGxleSBPcnRob3BlZGljIEdyb3VwMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAslDbIXr8H7SnjSCKfbekGvWzJNPzAdajHs1BKHZIRdhcF5LGaHVGu0UURHpuaJUrNyJfqhRezz2jyNtS4/iI05BTYgd68m0Y/abfMYWTTFzwzVXbfZXFkXRSSZXFBBk/OS4ayFHSyppA7EPy49uMmIwjv0fd9Ql9TCu9M9JG6pzbBg46KElF2zD42/SVeRk6sn+soIKiwKEnBtDlPTSu54guK2ddtIfoNHCZo1qPOkLj33SHRbEc0IUQhVYJjpvBdFTYBWAFCdl3p7xFIr/DoM1qjNrYzKNHKL2x5Ll80MzVy5/2F1FCFzWS1eA0O7A9fpzJ7aV36m7ljvZMxtLLVwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCLDS7Z1cyRgbb+Cw5ucMbuI4wdF9zZMq0XR80DoPYPLnlMmpbl9tiZIc53Ox6xQnvp0xLBzb7t3DN9hXk0LSeuZrHatPPE16LOaUqvA+IDOg+seVHamrqZLemGYzOKaXO6JOxctZwghkyj8Kg2ff8++Msceu/lv0h5R1nukK2eaFAG8YcYRKLPcerSBkj5pZHRtmPx11eoTqRRjgd03zH9rijR/w67zx8ATvhveo9qFPpI5Gn/sn1D3QdBvf2GqQrH5s/hKGAd7gn992uCU1MpF+f5ARtS3rRjaiHmaKb026XPT7MY7gaLfEQ8Bj6BdE4Cl4P45EgMaddPBHbavC6X</X509Certificate></X509Data></KeyInfo></Signature></ClinicalDocument>

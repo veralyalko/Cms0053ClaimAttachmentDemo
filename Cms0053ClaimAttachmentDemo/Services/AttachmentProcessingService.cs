@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 using Cms0053ClaimAttachmentDemo.Data;
 using Cms0053ClaimAttachmentDemo.Models;
@@ -64,6 +67,17 @@ public partial class AttachmentProcessingService(
             ["1234567890"] = "Metro Health Clinic",
             ["9876543210"] = "Riverside Family Medicine",
             ["5551234567"] = "Valley Orthopedic Group",
+        };
+
+    // Self-signed X.509 certificates (DER, public key only) for each provider NPI.
+    // [XMLDSIG-PLACEHOLDER] In production, replace with CA-issued certificates validated against
+    // a HISP DirectTrust bundle; add chain validation and CRL/OCSP revocation checks.
+    private static readonly IReadOnlyDictionary<string, byte[]> ProviderCertificates =
+        new Dictionary<string, byte[]>
+        {
+            ["1234567890"] = Convert.FromBase64String("MIIDSTCCAjGgAwIBAgIJALcHFHIF3GhbMA0GCSqGSIb3DQEBCwUAMGQxCzAJBgNVBAYTAlVTMRwwGgYDVQQKExNNZXRybyBIZWFsdGggQ2xpbmljMRkwFwYJYIZIAYb5WwQGEwoxMjM0NTY3ODkwMRwwGgYDVQQDExNNZXRybyBIZWFsdGggQ2xpbmljMB4XDTI2MDYxMzAyNTIxOFoXDTI5MDYxNDAyNTIxOFowZDELMAkGA1UEBhMCVVMxHDAaBgNVBAoTE01ldHJvIEhlYWx0aCBDbGluaWMxGTAXBglghkgBhvlbBAYTCjEyMzQ1Njc4OTAxHDAaBgNVBAMTE01ldHJvIEhlYWx0aCBDbGluaWMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYzdVb3bcmddIl4bLxIL+v9rrdqb0Nh9xwKLQM0LG1qXpx8mBSjAuXDu7iRotSFoSppgB2Snuo/+4Q7QJRZ2vFkyk/SqW5H0eUC7A4D9asQpceu6ZqVbs3mUCKiD+/L/BuFqagbTELt8tPZaSE6Rcxeg+sEkCORjp6AaUeIvYN4bC94KetWwtttAkJgyiy/i2R6cQ6g+wGFzPDO8KP+SFcQj7yKBp09xNETixPXKJaia5/4+dVSpcb+3T/1teS8qnbYPll7K82eRbEveAAgWYUjlWLXArdy+A3IIDvKBwurRCdQH5tfE9O1RthsQCqZAryjQboH1kmFWuUqg/yAljJAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAFlkW4uWO6Zcxz6JvwfrGDOLT8emo14jhTx4nXGmY4ZngnbBtST9z67sXQDkIeCSw/DKJ5flG5Te08Bya1VX5+VH6H0zsy3U4iz6d2l8QIdN0MC6pko1o0FIFUwf+GJa01rvfH4hpuMO3Bu31Zr8L4Ik4ZILwDcqLHhu7NsGfaXYma60PEyuDj3b2pfT2zHkAkKzdLFuFiHfEX0Ope19ZZnsPPMRm7o5Bvw5o9QQMDHemb1QCdYfEfHxDEjHzErhEc5c7jdYxi0yb1r3svbZwcT2aRhH7Z9nwwXmtyR/fpeyi18uFyppRQoZEjC8jpa5+EyrpPKflFDBfhF3ZEmKuyY="),
+            ["9876543210"] = Convert.FromBase64String("MIIDYDCCAkigAwIBAgIIYHD3kCpB+ZwwDQYJKoZIhvcNAQELBQAwcDELMAkGA1UEBhMCVVMxIjAgBgNVBAoTGVJpdmVyc2lkZSBGYW1pbHkgTWVkaWNpbmUxGTAXBglghkgBhvlbBAYTCjk4NzY1NDMyMTAxIjAgBgNVBAMTGVJpdmVyc2lkZSBGYW1pbHkgTWVkaWNpbmUwHhcNMjYwNjEzMDI1MjE4WhcNMjkwNjE0MDI1MjE4WjBwMQswCQYDVQQGEwJVUzEiMCAGA1UEChMZUml2ZXJzaWRlIEZhbWlseSBNZWRpY2luZTEZMBcGCWCGSAGG+VsEBhMKOTg3NjU0MzIxMDEiMCAGA1UEAxMZUml2ZXJzaWRlIEZhbWlseSBNZWRpY2luZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALwSFgBFNYmWogzZyDgJIBXw8Q/h9na+Jsighr41Bp99QkA93T4FbwvZu9dtLByJMzNidfu+xBhYJKqVrb6CN5Fa2+83CI7yZuMDLj2JFvAFxDAUYu6LFcOaaUkLjGoMeVUuAFBN6e+hd1o3ZRkTeEOCwJumzLQzqSxKfoonBdO4QFSZ4Chewnzj/WJCANBmoBJaK90HsUfiWI6E1rI4vuxkM69DjkuLVQpOvjHKwAcwBRAGloVY9wLhcPOyY0RSn3leG/on+nlaLVpZPPERSa5RXBXHyf5bDmD/HusIOEFhk9vN49/FtrLLckxO+EBWgp9pcJOmpqtAZm/YAjRaPkkCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAAKXzxEF6YhN0+kRglKVT4rFoDzpP/aWqQbCpMMhsf2aNaEEyEZwkrQ5np2r7voSMif2Encl8Q9CictNV2irkzNPdfB+O8zocI6iNs6hgV5gSQkVVCMrOpJLJUGfRH0lWQnqWITIUjCy+SA74qwnZp9tDJCDlD0Jz88iG00XXeZknPIIUldhVJmqMsiJgveR9I0jSsI41Dr9dUQwczqEnNzFJIoYVoUENjoTJphvghA5wHRJuim7z/+ujAOHiBByTcH8dP/MBDh/aVwwZCwPmiCEjp0xm06hqlhUraqbhMsvgOZ6DU7mjHzyMzl6srcwEhvl2WtTnP8N/aTV6pbjpjQ=="),
+            ["5551234567"] = Convert.FromBase64String("MIIDWTCCAkGgAwIBAgIJAJuDAdkIv+mjMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNVBAYTAlVTMSAwHgYDVQQKExdWYWxsZXkgT3J0aG9wZWRpYyBHcm91cDEZMBcGCWCGSAGG+VsEBhMKNTU1MTIzNDU2NzEgMB4GA1UEAxMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAwHhcNMjYwNjEzMDI1MjE4WhcNMjkwNjE0MDI1MjE4WjBsMQswCQYDVQQGEwJVUzEgMB4GA1UEChMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAxGTAXBglghkgBhvlbBAYTCjU1NTEyMzQ1NjcxIDAeBgNVBAMTF1ZhbGxleSBPcnRob3BlZGljIEdyb3VwMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAslDbIXr8H7SnjSCKfbekGvWzJNPzAdajHs1BKHZIRdhcF5LGaHVGu0UURHpuaJUrNyJfqhRezz2jyNtS4/iI05BTYgd68m0Y/abfMYWTTFzwzVXbfZXFkXRSSZXFBBk/OS4ayFHSyppA7EPy49uMmIwjv0fd9Ql9TCu9M9JG6pzbBg46KElF2zD42/SVeRk6sn+soIKiwKEnBtDlPTSu54guK2ddtIfoNHCZo1qPOkLj33SHRbEc0IUQhVYJjpvBdFTYBWAFCdl3p7xFIr/DoM1qjNrYzKNHKL2x5Ll80MzVy5/2F1FCFzWS1eA0O7A9fpzJ7aV36m7ljvZMxtLLVwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCLDS7Z1cyRgbb+Cw5ucMbuI4wdF9zZMq0XR80DoPYPLnlMmpbl9tiZIc53Ox6xQnvp0xLBzb7t3DN9hXk0LSeuZrHatPPE16LOaUqvA+IDOg+seVHamrqZLemGYzOKaXO6JOxctZwghkyj8Kg2ff8++Msceu/lv0h5R1nukK2eaFAG8YcYRKLPcerSBkj5pZHRtmPx11eoTqRRjgd03zH9rijR/w67zx8ATvhveo9qFPpI5Gn/sn1D3QdBvf2GqQrH5s/hKGAd7gn992uCU1MpF+f5ARtS3rRjaiHmaKb026XPT7MY7gaLfEQ8Bj6BdE4Cl4P45EgMaddPBHbavC6X"),
         };
 
     // SHALL-conformance section assertions per document LOINC, mirroring C-CDA R2.1 Schematron rules.
@@ -576,53 +590,61 @@ public partial class AttachmentProcessingService(
         }
     }
 
-    // [XMLDSIG-PLACEHOLDER] In production, cryptographically verify the RSA-SHA256 signature using
-    // the X.509 certificate in <KeyInfo>, validate the full certificate chain against a trusted CA
-    // or HISP DirectTrust bundle, and confirm certificate validity period and revocation (CRL/OCSP).
+    // Verifies the RSA-SHA256 enveloped XMLDSig signature cryptographically using the pinned
+    // provider certificate. Chain validation and CRL/OCSP are not performed here.
+    // [XMLDSIG-PLACEHOLDER] In production, add chain validation against a HISP DirectTrust bundle
+    // and OCSP/CRL revocation checks before trusting the certificate.
     private static void ValidateSignature(string filePath, string providerNPI,
         List<string> errors, List<string> warnings)
     {
-        XDocument doc;
-        try { doc = XDocument.Load(filePath); }
+        if (!ProviderCertificates.TryGetValue(providerNPI, out var certBytes))
+        {
+            warnings.Add($"No certificate on file for NPI {providerNPI}. Cannot verify electronic signature.");
+            return;
+        }
+
+        var xmlDoc = new XmlDocument { PreserveWhitespace = true };
+        try { xmlDoc.Load(filePath); }
         catch { return; }
 
-        XNamespace dsig = "http://www.w3.org/2000/09/xmldsig#";
-        var sig = doc.Descendants(dsig + "Signature").FirstOrDefault();
+        var sigEl = xmlDoc
+            .GetElementsByTagName("Signature", "http://www.w3.org/2000/09/xmldsig#")
+            .OfType<XmlElement>()
+            .FirstOrDefault();
 
-        if (sig is null)
+        if (sigEl is null)
         {
             warnings.Add("Document does not contain an XMLDSig electronic signature. " +
                 "In production, provider signatures are required for non-repudiation.");
             return;
         }
 
-        var sigValue = sig.Element(dsig + "SignatureValue")?.Value.Trim();
-        if (string.IsNullOrEmpty(sigValue))
+        var cert = X509CertificateLoader.LoadCertificate(certBytes);
+        var rsaKey = cert.GetRSAPublicKey()!;
+
+        var signedXml = new SignedXml(xmlDoc);
+        signedXml.LoadXml(sigEl);
+
+        if (!signedXml.CheckSignature(rsaKey))
         {
-            errors.Add("Electronic signature block is present but <SignatureValue> is empty.");
+            errors.Add("Electronic signature verification failed: the RSA-SHA256 signature is " +
+                "invalid. The document may have been tampered with after signing.");
             return;
         }
 
-        var subjectName = sig.Descendants(dsig + "X509SubjectName").FirstOrDefault()?.Value;
-        if (subjectName is null)
-        {
-            warnings.Add("Signature <KeyInfo> does not contain an X509SubjectName. " +
-                "Cannot verify NPI binding from certificate.");
-            return;
-        }
+        // Verify the certificate in the signature claims the correct provider NPI.
+        var subjectName = sigEl
+            .GetElementsByTagName("X509SubjectName", "http://www.w3.org/2000/09/xmldsig#")
+            .OfType<XmlElement>()
+            .FirstOrDefault()?.InnerText;
 
-        var npiMatch = NpiInCertRegex().Match(subjectName);
-        if (!npiMatch.Success)
+        if (subjectName is not null)
         {
-            warnings.Add("Signature certificate subject does not include an NPI " +
-                "(OID.2.16.840.1.113883.4.6). Cannot verify provider identity from certificate.");
-            return;
+            var npiMatch = NpiInCertRegex().Match(subjectName);
+            if (npiMatch.Success && npiMatch.Groups[1].Value != providerNPI)
+                errors.Add($"Signature certificate NPI ({npiMatch.Groups[1].Value}) does not match " +
+                    $"submitted provider NPI ({providerNPI}). The document was signed by a different provider.");
         }
-
-        var certNpi = npiMatch.Groups[1].Value;
-        if (certNpi != providerNPI)
-            errors.Add($"Signature certificate NPI ({certNpi}) does not match submitted " +
-                $"provider NPI ({providerNPI}). The document was signed by a different provider.");
     }
 
     [GeneratedRegex(@"^\d{10}$")]

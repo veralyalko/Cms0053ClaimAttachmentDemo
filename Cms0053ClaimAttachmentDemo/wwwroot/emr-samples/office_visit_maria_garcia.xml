@@ -1,28 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!-- DEMO DATA — NOT REAL PHI. Generated for CMS-0053 prototype. -->
-<ClinicalDocument xmlns="urn:hl7-org:v3"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:sdtc="urn:hl7-org:sdtc">
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdtc="urn:hl7-org:sdtc">
 
-  <realmCode code="US"/>
-  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+  <realmCode code="US" />
+  <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040" />
 
   <!-- C-CDA R2.1 US Realm Header -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.1" extension="2015-08-01" />
   <!-- History and Physical Note -->
-  <templateId root="2.16.840.1.113883.10.20.22.1.3" extension="2015-08-01"/>
+  <templateId root="2.16.840.1.113883.10.20.22.1.3" extension="2015-08-01" />
 
-  <id root="2.16.840.1.113883.19.5.99999.1" extension="HP-2025-0001"/>
-  <code code="34117-2" codeSystem="2.16.840.1.113883.6.1"
-        codeSystemName="LOINC" displayName="History and physical note"/>
+  <id root="2.16.840.1.113883.19.5.99999.1" extension="HP-2025-0001" />
+  <code code="34117-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History and physical note" />
   <title>Office Visit Notes — Maria Garcia</title>
-  <effectiveTime value="20251103"/>
-  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal"/>
-  <languageCode code="en-US"/>
+  <effectiveTime value="20251103" />
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" displayName="Normal" />
+  <languageCode code="en-US" />
 
   <recordTarget>
     <patientRole>
-      <id extension="DEMO-MG-004" root="2.16.840.1.113883.19.5"/>
+      <id extension="DEMO-MG-004" root="2.16.840.1.113883.19.5" />
       <addr use="HP">
         <streetAddressLine>567 Elm Court</streetAddressLine>
         <city>Springfield</city>
@@ -30,32 +27,32 @@
         <postalCode>62703</postalCode>
         <country>US</country>
       </addr>
-      <telecom use="HP" value="tel:555-201-0004"/>
+      <telecom use="HP" value="tel:555-201-0004" />
       <patient>
         <name use="L">
           <given>Maria</given>
           <family>Garcia</family>
         </name>
-        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
-        <birthTime value="19820722"/>
-        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
-        <ethnicGroupCode code="2135-2" codeSystem="2.16.840.1.113883.6.238" displayName="Hispanic or Latino"/>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female" />
+        <birthTime value="19820722" />
+        <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White" />
+        <ethnicGroupCode code="2135-2" codeSystem="2.16.840.1.113883.6.238" displayName="Hispanic or Latino" />
         <languageCommunication>
-          <languageCode code="es"/>
-          <preferenceInd value="true"/>
+          <languageCode code="es" />
+          <preferenceInd value="true" />
         </languageCommunication>
         <languageCommunication>
-          <languageCode code="en-US"/>
-          <preferenceInd value="false"/>
+          <languageCode code="en-US" />
+          <preferenceInd value="false" />
         </languageCommunication>
       </patient>
     </patientRole>
   </recordTarget>
 
   <author>
-    <time value="20251103"/>
+    <time value="20251103" />
     <assignedAuthor>
-      <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+      <id extension="1234567890" root="2.16.840.1.113883.4.6" />
       <assignedPerson>
         <name>
           <prefix>Dr.</prefix>
@@ -65,9 +62,9 @@
         </name>
       </assignedPerson>
       <representedOrganization>
-        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6" />
         <name>Metro Health Clinic</name>
-        <telecom use="WP" value="tel:555-200-1000"/>
+        <telecom use="WP" value="tel:555-200-1000" />
         <addr use="WP">
           <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
           <city>Springfield</city>
@@ -82,9 +79,9 @@
   <custodian>
     <assignedCustodian>
       <representedCustodianOrganization>
-        <id extension="1234567890" root="2.16.840.1.113883.4.6"/>
+        <id extension="1234567890" root="2.16.840.1.113883.4.6" />
         <name>Metro Health Clinic</name>
-        <telecom use="WP" value="tel:555-200-1000"/>
+        <telecom use="WP" value="tel:555-200-1000" />
         <addr use="WP">
           <streetAddressLine>456 Medical Center Blvd</streetAddressLine>
           <city>Springfield</city>
@@ -102,8 +99,7 @@
       <!-- Chief Complaint LOINC 10154-3 -->
       <component>
         <section>
-          <code code="10154-3" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Chief complaint Narrative - Reported"/>
+          <code code="10154-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Chief complaint Narrative - Reported" />
           <title>Chief Complaint</title>
           <text>
             <paragraph>
@@ -117,9 +113,8 @@
       <!-- History of Present Illness LOINC 10164-2 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.22.2.20" extension="2015-08-01"/>
-          <code code="10164-2" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="History of present illness Narrative"/>
+          <templateId root="2.16.840.1.113883.10.20.22.2.20" extension="2015-08-01" />
+          <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of present illness Narrative" />
           <title>History of Present Illness</title>
           <text>
             <paragraph>
@@ -143,9 +138,8 @@
       <!-- Physical Exam LOINC 29545-1 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.2.10" extension="2015-08-01"/>
-          <code code="29545-1" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Physical findings Narrative"/>
+          <templateId root="2.16.840.1.113883.10.20.2.10" extension="2015-08-01" />
+          <code code="29545-1" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Physical findings Narrative" />
           <title>Physical Examination</title>
           <text>
             <paragraph><content styleCode="Bold">Vital Signs:</content></paragraph>
@@ -175,9 +169,8 @@
       <!-- Assessment and Plan LOINC 51847-2 -->
       <component>
         <section>
-          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09"/>
-          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1"
-                codeSystemName="LOINC" displayName="Evaluation + Plan note"/>
+          <templateId root="2.16.840.1.113883.10.20.22.2.9" extension="2014-06-09" />
+          <code code="51847-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Evaluation + Plan note" />
           <title>Assessment and Plan</title>
           <text>
             <paragraph>
@@ -200,14 +193,12 @@
           </text>
           <entry typeCode="DRIV">
             <observation classCode="OBS" moodCode="EVN">
-              <templateId root="2.16.840.1.113883.10.20.22.4.4" extension="2015-08-01"/>
-              <id root="2.16.840.1.113883.19.5.99999.4" extension="PROB-MG-001"/>
-              <code code="55607006" codeSystem="2.16.840.1.113883.6.96"
-                    codeSystemName="SNOMED CT" displayName="Problem"/>
-              <statusCode code="completed"/>
-              <effectiveTime value="20251103"/>
-              <value xsi:type="CD" code="J45.909" codeSystem="2.16.840.1.113883.6.90"
-                     codeSystemName="ICD-10-CM" displayName="Unspecified asthma, uncomplicated"/>
+              <templateId root="2.16.840.1.113883.10.20.22.4.4" extension="2015-08-01" />
+              <id root="2.16.840.1.113883.19.5.99999.4" extension="PROB-MG-001" />
+              <code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Problem" />
+              <statusCode code="completed" />
+              <effectiveTime value="20251103" />
+              <value xsi:type="CD" code="J45.909" codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM" displayName="Unspecified asthma, uncomplicated" />
             </observation>
           </entry>
         </section>
@@ -216,24 +207,5 @@
     </structuredBody>
   </component>
   <!-- DEMO: Enveloped XMLDSig electronic signature. SignatureValue is not cryptographically valid. -->
-  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
-    <SignedInfo>
-      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
-      <Reference URI="">
-        <Transforms>
-          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-        </Transforms>
-        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-        <DigestValue>DEMO-DIGEST-NOT-CRYPTOGRAPHICALLY-VALID</DigestValue>
-      </Reference>
-    </SignedInfo>
-    <SignatureValue>DEMO-RSA-SHA256-NOT-CRYPTOGRAPHICALLY-VALID-CMS0053-PROTOTYPE</SignatureValue>
-    <KeyInfo>
-      <X509Data>
-        <X509SubjectName>CN=Metro Health Clinic, OID.2.16.840.1.113883.4.6=1234567890, O=Metro Health Clinic, C=US</X509SubjectName>
-        <X509Certificate>DEMO-CERTIFICATE-NOT-REAL-CMS0053-PROTOTYPE</X509Certificate>
-      </X509Data>
-    </KeyInfo>
-  </Signature>
-</ClinicalDocument>
+  
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>9vKTxCl6gqDE7+bP9Ymd1AxK3VrWS9aLDwAVt+c2n2Q=</DigestValue></Reference></SignedInfo><SignatureValue>S2J8X3bxTbVl0rcxUHo0CkqdWCJTbPRef9CvVlW3JliZDLEEU2X1dNg91Km/rSyL5odtcSB7AcMzMIQmBBs5Zd3cXf19kksT6u8Rl0y+EYhLAEVZ507F2RWKSRnm91IyqnzEGvOtFapQieWlz0dl76CIqmGYfWz84nIGijKHShkDmWDiz/0MpGJmdw0uqaSfppOMpLvicjEKxlRLICKi2FIVB0t+K2cVfe6vbmS0etGB+YIYND0645G/1ocJCPgZ+IGCWLWRag/zZ6XjTWoHARE/xKLs1v4cJzlyfALlAQR4vLiiYCLWx9bQYSnQdnI1VlWxMA428kERU2B2GRkYog==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDSTCCAjGgAwIBAgIJALcHFHIF3GhbMA0GCSqGSIb3DQEBCwUAMGQxCzAJBgNVBAYTAlVTMRwwGgYDVQQKExNNZXRybyBIZWFsdGggQ2xpbmljMRkwFwYJYIZIAYb5WwQGEwoxMjM0NTY3ODkwMRwwGgYDVQQDExNNZXRybyBIZWFsdGggQ2xpbmljMB4XDTI2MDYxMzAyNTIxOFoXDTI5MDYxNDAyNTIxOFowZDELMAkGA1UEBhMCVVMxHDAaBgNVBAoTE01ldHJvIEhlYWx0aCBDbGluaWMxGTAXBglghkgBhvlbBAYTCjEyMzQ1Njc4OTAxHDAaBgNVBAMTE01ldHJvIEhlYWx0aCBDbGluaWMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYzdVb3bcmddIl4bLxIL+v9rrdqb0Nh9xwKLQM0LG1qXpx8mBSjAuXDu7iRotSFoSppgB2Snuo/+4Q7QJRZ2vFkyk/SqW5H0eUC7A4D9asQpceu6ZqVbs3mUCKiD+/L/BuFqagbTELt8tPZaSE6Rcxeg+sEkCORjp6AaUeIvYN4bC94KetWwtttAkJgyiy/i2R6cQ6g+wGFzPDO8KP+SFcQj7yKBp09xNETixPXKJaia5/4+dVSpcb+3T/1teS8qnbYPll7K82eRbEveAAgWYUjlWLXArdy+A3IIDvKBwurRCdQH5tfE9O1RthsQCqZAryjQboH1kmFWuUqg/yAljJAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAFlkW4uWO6Zcxz6JvwfrGDOLT8emo14jhTx4nXGmY4ZngnbBtST9z67sXQDkIeCSw/DKJ5flG5Te08Bya1VX5+VH6H0zsy3U4iz6d2l8QIdN0MC6pko1o0FIFUwf+GJa01rvfH4hpuMO3Bu31Zr8L4Ik4ZILwDcqLHhu7NsGfaXYma60PEyuDj3b2pfT2zHkAkKzdLFuFiHfEX0Ope19ZZnsPPMRm7o5Bvw5o9QQMDHemb1QCdYfEfHxDEjHzErhEc5c7jdYxi0yb1r3svbZwcT2aRhH7Z9nwwXmtyR/fpeyi18uFyppRQoZEjC8jpa5+EyrpPKflFDBfhF3ZEmKuyY=</X509Certificate></X509Data></KeyInfo></Signature></ClinicalDocument>
