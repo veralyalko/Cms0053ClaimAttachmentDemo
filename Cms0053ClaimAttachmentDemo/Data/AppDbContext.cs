@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<AttachmentValidationResult> AttachmentValidationResults => Set<AttachmentValidationResult>();
     public DbSet<ClearinghouseAttachment> ClearinghouseAttachments => Set<ClearinghouseAttachment>();
     public DbSet<EmrDocument> EmrDocuments => Set<EmrDocument>();
+    public DbSet<AttachmentSignatureVerification> AttachmentSignatureVerifications => Set<AttachmentSignatureVerification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,8 +24,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<AttachmentRequest>()
             .HasIndex(r => r.SecureUploadToken).IsUnique();
 
-        // One-to-one: each ClaimAttachment has at most one ValidationResult
         modelBuilder.Entity<AttachmentValidationResult>()
+            .HasIndex(v => v.ClaimAttachmentId).IsUnique();
+
+        modelBuilder.Entity<AttachmentSignatureVerification>()
             .HasIndex(v => v.ClaimAttachmentId).IsUnique();
     }
 }

@@ -12,6 +12,7 @@ public class DetailModel(AppDbContext db) : PageModel
     public ClaimAttachment Attachment { get; set; } = null!;
     public List<string> ValidationErrors { get; set; } = [];
     public List<string> ValidationWarnings { get; set; } = [];
+    public AttachmentSignatureVerification? SignatureVerification { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
@@ -49,11 +50,13 @@ public class DetailModel(AppDbContext db) : PageModel
             .Include(a => a.Claim)
             .Include(a => a.AttachmentRequest)
             .Include(a => a.ValidationResult)
+            .Include(a => a.SignatureVerification)
             .Include(a => a.StatusHistory.OrderBy(h => h.ChangedAt))
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (attachment is null) return false;
         Attachment = attachment;
+        SignatureVerification = attachment.SignatureVerification;
 
         if (attachment.ValidationResult is not null)
         {

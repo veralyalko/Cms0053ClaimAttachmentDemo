@@ -150,6 +150,54 @@
             </div>
         </div>
 
+        @if (Model.SignatureVerification is not null)
+        {
+            var sv = Model.SignatureVerification;
+            var (sigBorder, sigBadgeClass, sigBadgeText, sigIcon) = sv.IsVerified
+                ? ("border-success", "bg-success", "Signature Verified", "✓")
+                : ("border-danger",  "bg-danger",  "Signature Invalid",  "✗");
+            <div class="card @sigBorder mb-3">
+                <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                    <span>Electronic Signature Proof</span>
+                    <span class="badge @sigBadgeClass">@sigIcon @sigBadgeText</span>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-4">Verification Result</dt>
+                        <dd class="col-sm-8">
+                            @if (sv.IsVerified)
+                            {
+                                <span class="text-success fw-semibold">RSA-SHA256 signature cryptographically verified.</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger fw-semibold">@sv.FailureReason</span>
+                            }
+                        </dd>
+                        <dt class="col-sm-4">Algorithm</dt>
+                        <dd class="col-sm-8 font-monospace">@sv.Algorithm</dd>
+                        @if (sv.CertificateSubject is not null)
+                        {
+                            <dt class="col-sm-4">Certificate Subject</dt>
+                            <dd class="col-sm-8 font-monospace" style="word-break:break-all">@sv.CertificateSubject</dd>
+                        }
+                        @if (sv.CertificateThumbprint is not null)
+                        {
+                            <dt class="col-sm-4">SHA-256 Thumbprint</dt>
+                            <dd class="col-sm-8 font-monospace" style="word-break:break-all">@sv.CertificateThumbprint</dd>
+                        }
+                        @if (sv.CertificateValidFrom is not null && sv.CertificateValidTo is not null)
+                        {
+                            <dt class="col-sm-4">Certificate Valid</dt>
+                            <dd class="col-sm-8">@sv.CertificateValidFrom.Value.ToString("MM/dd/yyyy") &ndash; @sv.CertificateValidTo.Value.ToString("MM/dd/yyyy")</dd>
+                        }
+                        <dt class="col-sm-4">Verified At</dt>
+                        <dd class="col-sm-8">@sv.VerifiedAt.ToString("MM/dd/yyyy HH:mm:ss") UTC</dd>
+                    </dl>
+                </div>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header fw-semibold">Status History</div>
             <div class="card-body p-0">

@@ -25,5 +25,6 @@ public class ClaimAttachment
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public AttachmentValidationResult? ValidationResult { get; set; }
+    public AttachmentSignatureVerification? SignatureVerification { get; set; }
     public ICollection<AttachmentStatusHistory> StatusHistory { get; set; } = [];
 }

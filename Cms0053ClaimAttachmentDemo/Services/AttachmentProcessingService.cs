@@ -239,11 +239,12 @@ public partial class AttachmentProcessingService(
         ValidateNpi(providerNPI, errors);
 
         // C-CDA structural, template, and identity validation for XML submissions
+        SignatureProof? sigProof = null;
         if (contentType is "text/xml" or "application/xml")
         {
             ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), documentType,
                 patientName, attachment.PatientDOB, providerNPI, serviceDate, errors, warnings);
-            ValidateSignature(fileStorage.GetFilePath(attachment.StoredFileName), providerNPI, errors, warnings);
+            sigProof = ValidateSignature(fileStorage.GetFilePath(attachment.StoredFileName), providerNPI, errors, warnings);
         }
 
         db.AttachmentValidationResults.Add(new AttachmentValidationResult
@@ -254,6 +255,20 @@ public partial class AttachmentProcessingService(
             Warnings          = JsonSerializer.Serialize(warnings),
             ValidatedAt       = DateTime.UtcNow
         });
+
+        if (sigProof is not null)
+            db.AttachmentSignatureVerifications.Add(new AttachmentSignatureVerification
+            {
+                ClaimAttachmentId    = attachment.Id,
+                IsVerified           = sigProof.IsVerified,
+                Algorithm            = sigProof.Algorithm,
+                CertificateSubject   = sigProof.CertificateSubject,
+                CertificateThumbprint = sigProof.CertificateThumbprint,
+                CertificateValidFrom = sigProof.CertificateValidFrom,
+                CertificateValidTo   = sigProof.CertificateValidTo,
+                FailureReason        = sigProof.FailureReason,
+                VerifiedAt           = DateTime.UtcNow,
+            });
 
         if (errors.Count > 0)
         {
@@ -594,18 +609,21 @@ public partial class AttachmentProcessingService(
     // provider certificate. Chain validation and CRL/OCSP are not performed here.
     // [XMLDSIG-PLACEHOLDER] In production, add chain validation against a HISP DirectTrust bundle
     // and OCSP/CRL revocation checks before trusting the certificate.
-    private static void ValidateSignature(string filePath, string providerNPI,
+    private static SignatureProof ValidateSignature(string filePath, string providerNPI,
         List<string> errors, List<string> warnings)
     {
+        const string algorithm = "RSA-SHA256 / XMLDSig Enveloped / C14N";
+
         if (!ProviderCertificates.TryGetValue(providerNPI, out var certBytes))
         {
             warnings.Add($"No certificate on file for NPI {providerNPI}. Cannot verify electronic signature.");
-            return;
+            return new SignatureProof(false, algorithm, null, null, null, null,
+                $"No certificate registered for NPI {providerNPI}");
         }
 
         var xmlDoc = new XmlDocument { PreserveWhitespace = true };
         try { xmlDoc.Load(filePath); }
-        catch { return; }
+        catch { return new SignatureProof(false, algorithm, null, null, null, null, "Failed to parse XML"); }
 
         var sigEl = xmlDoc
             .GetElementsByTagName("Signature", "http://www.w3.org/2000/09/xmldsig#")
@@ -616,11 +634,12 @@ public partial class AttachmentProcessingService(
         {
             warnings.Add("Document does not contain an XMLDSig electronic signature. " +
                 "In production, provider signatures are required for non-repudiation.");
-            return;
+            return new SignatureProof(false, algorithm, null, null, null, null, "No <Signature> element found");
         }
 
         var cert = X509CertificateLoader.LoadCertificate(certBytes);
         var rsaKey = cert.GetRSAPublicKey()!;
+        var thumbprint = cert.GetCertHashString(System.Security.Cryptography.HashAlgorithmName.SHA256);
 
         var signedXml = new SignedXml(xmlDoc);
         signedXml.LoadXml(sigEl);
@@ -629,10 +648,11 @@ public partial class AttachmentProcessingService(
         {
             errors.Add("Electronic signature verification failed: the RSA-SHA256 signature is " +
                 "invalid. The document may have been tampered with after signing.");
-            return;
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint,
+                cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(),
+                "RSA-SHA256 CheckSignature returned false — document content does not match signature");
         }
 
-        // Verify the certificate in the signature claims the correct provider NPI.
         var subjectName = sigEl
             .GetElementsByTagName("X509SubjectName", "http://www.w3.org/2000/09/xmldsig#")
             .OfType<XmlElement>()
@@ -642,10 +662,27 @@ public partial class AttachmentProcessingService(
         {
             var npiMatch = NpiInCertRegex().Match(subjectName);
             if (npiMatch.Success && npiMatch.Groups[1].Value != providerNPI)
+            {
                 errors.Add($"Signature certificate NPI ({npiMatch.Groups[1].Value}) does not match " +
                     $"submitted provider NPI ({providerNPI}). The document was signed by a different provider.");
+                return new SignatureProof(false, algorithm, cert.Subject, thumbprint,
+                    cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(),
+                    $"Certificate NPI {npiMatch.Groups[1].Value} does not match submitted NPI {providerNPI}");
+            }
         }
+
+        return new SignatureProof(true, algorithm, cert.Subject, thumbprint,
+            cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(), null);
     }
+
+    private record SignatureProof(
+        bool IsVerified,
+        string Algorithm,
+        string? CertificateSubject,
+        string? CertificateThumbprint,
+        DateTime? CertificateValidFrom,
+        DateTime? CertificateValidTo,
+        string? FailureReason);
 
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex NpiRegex();
