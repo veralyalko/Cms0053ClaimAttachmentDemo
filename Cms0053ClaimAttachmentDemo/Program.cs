@@ -19,7 +19,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
-    SeedData.Initialize(db);
+    SeedData.Initialize(db, app.Environment.ContentRootPath);
 }
 
 if (!app.Environment.IsDevelopment())
