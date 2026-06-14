@@ -69,6 +69,23 @@
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
 
                         <div class="mb-3">
+                            <label asp-for="Input.DocumentType" class="form-label fw-semibold">
+                                Document Type <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Input.DocumentType" class="form-select">
+                                <option value="">-- Select the type of document you are submitting --</option>
+                                @foreach (var dt in UploadModel.DocumentTypes)
+                                {
+                                    <option value="@dt">@dt</option>
+                                }
+                            </select>
+                            <div class="form-text">
+                                Payer requested: <strong>@Model.AttachReq.DocumentTypeRequested</strong>
+                            </div>
+                            <span asp-validation-for="Input.DocumentType" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
                             <label asp-for="Input.File" class="form-label fw-semibold">
                                 Document File <span class="text-danger">*</span>
                             </label>

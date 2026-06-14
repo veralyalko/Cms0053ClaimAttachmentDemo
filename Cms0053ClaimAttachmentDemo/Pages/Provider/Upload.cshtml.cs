@@ -50,7 +50,7 @@ public class UploadModel(AppDbContext db, AttachmentProcessingService pipeline) 
             PatientDOB:          request.Claim.PatientDOB,
             ProviderNPI:         request.Claim.ProviderNPI,
             ServiceDate:         request.Claim.ServiceDate,
-            DocumentType:        request.DocumentTypeRequested,
+            DocumentType:        Input.DocumentType,
             SubmittedBy:         Input.SubmittedBy,
             Notes:               Input.Notes,
             AttachmentRequestId: request.Id
@@ -65,10 +65,19 @@ public class UploadModel(AppDbContext db, AttachmentProcessingService pipeline) 
             .Include(r => r.Claim)
             .FirstOrDefaultAsync(r => r.SecureUploadToken == token);
 
+    public static readonly string[] DocumentTypes =
+    [
+        "Lab Results", "Operative Report", "Radiology Report",
+        "Office Visit Notes", "Physical Therapy Notes", "Consultation Note"
+    ];
+
     public class InputModel
     {
         [Required(ErrorMessage = "Please select a file to upload.")]
         public IFormFile? File { get; set; }
+
+        [Required(ErrorMessage = "Please select the document type you are submitting.")]
+        public string DocumentType { get; set; } = "";
 
         [Required(ErrorMessage = "Please enter your name or practice name.")]
         public string SubmittedBy { get; set; } = "";
