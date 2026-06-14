@@ -218,6 +218,7 @@ public partial class AttachmentProcessingService(
         var warnings = new List<string>();
 
         await CheckDuplicatesAsync(attachment, providerNPI, patientName, serviceDate, documentType, errors, warnings);
+        await CheckSolicitedDocumentTypeAsync(attachment, documentType, errors);
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, attachment.PatientDOB,
             serviceDate, documentType, errors, warnings);
         ValidateMagicBytes(fileStorage.GetFilePath(attachment.StoredFileName), contentType, errors);
@@ -311,6 +312,26 @@ public partial class AttachmentProcessingService(
         if (!MockNpiRegistry.ContainsKey(providerNPI))
             errors.Add($"Provider NPI {providerNPI} was not found in the NPI registry. " +
                        "Verify the NPI is correct and active.");
+    }
+
+    private async Task CheckSolicitedDocumentTypeAsync(
+        ClaimAttachment attachment, string documentType, List<string> errors)
+    {
+        if (attachment.AttachmentRequestId is null) return;
+
+        var req = await db.AttachmentRequests
+            .AsNoTracking()
+            .Where(r => r.Id == attachment.AttachmentRequestId.Value)
+            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber })
+            .FirstOrDefaultAsync();
+
+        if (req is null) return;
+
+        if (!string.Equals(req.DocumentTypeRequested, documentType, StringComparison.OrdinalIgnoreCase))
+            errors.Add(
+                $"Document type mismatch: payer requested '{req.DocumentTypeRequested}' " +
+                $"(request {req.TrackingNumber}) but received '{documentType}'. " +
+                $"Please resubmit with the correct document type.");
     }
 
     private async Task CheckDuplicatesAsync(
