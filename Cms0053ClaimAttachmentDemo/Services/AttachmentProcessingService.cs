@@ -226,8 +226,11 @@ public partial class AttachmentProcessingService(
 
         // C-CDA structural, template, and identity validation for XML submissions
         if (contentType is "text/xml" or "application/xml")
+        {
             ValidateCcda(fileStorage.GetFilePath(attachment.StoredFileName), documentType,
                 patientName, attachment.PatientDOB, providerNPI, serviceDate, errors, warnings);
+            ValidateSignature(fileStorage.GetFilePath(attachment.StoredFileName), providerNPI, errors, warnings);
+        }
 
         db.AttachmentValidationResults.Add(new AttachmentValidationResult
         {
@@ -573,6 +576,58 @@ public partial class AttachmentProcessingService(
         }
     }
 
+    // [XMLDSIG-PLACEHOLDER] In production, cryptographically verify the RSA-SHA256 signature using
+    // the X.509 certificate in <KeyInfo>, validate the full certificate chain against a trusted CA
+    // or HISP DirectTrust bundle, and confirm certificate validity period and revocation (CRL/OCSP).
+    private static void ValidateSignature(string filePath, string providerNPI,
+        List<string> errors, List<string> warnings)
+    {
+        XDocument doc;
+        try { doc = XDocument.Load(filePath); }
+        catch { return; }
+
+        XNamespace dsig = "http://www.w3.org/2000/09/xmldsig#";
+        var sig = doc.Descendants(dsig + "Signature").FirstOrDefault();
+
+        if (sig is null)
+        {
+            warnings.Add("Document does not contain an XMLDSig electronic signature. " +
+                "In production, provider signatures are required for non-repudiation.");
+            return;
+        }
+
+        var sigValue = sig.Element(dsig + "SignatureValue")?.Value.Trim();
+        if (string.IsNullOrEmpty(sigValue))
+        {
+            errors.Add("Electronic signature block is present but <SignatureValue> is empty.");
+            return;
+        }
+
+        var subjectName = sig.Descendants(dsig + "X509SubjectName").FirstOrDefault()?.Value;
+        if (subjectName is null)
+        {
+            warnings.Add("Signature <KeyInfo> does not contain an X509SubjectName. " +
+                "Cannot verify NPI binding from certificate.");
+            return;
+        }
+
+        var npiMatch = NpiInCertRegex().Match(subjectName);
+        if (!npiMatch.Success)
+        {
+            warnings.Add("Signature certificate subject does not include an NPI " +
+                "(OID.2.16.840.1.113883.4.6). Cannot verify provider identity from certificate.");
+            return;
+        }
+
+        var certNpi = npiMatch.Groups[1].Value;
+        if (certNpi != providerNPI)
+            errors.Add($"Signature certificate NPI ({certNpi}) does not match submitted " +
+                $"provider NPI ({providerNPI}). The document was signed by a different provider.");
+    }
+
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex NpiRegex();
+
+    [GeneratedRegex(@"OID\.2\.16\.840\.1\.113883\.4\.6=(\d{10})")]
+    private static partial Regex NpiInCertRegex();
 }

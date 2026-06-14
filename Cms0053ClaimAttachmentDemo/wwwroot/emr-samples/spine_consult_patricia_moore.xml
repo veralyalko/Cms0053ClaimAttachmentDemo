@@ -78,4 +78,25 @@
       </component>
     </structuredBody>
   </component>
+  <!-- DEMO: Enveloped XMLDSig electronic signature. SignatureValue is not cryptographically valid. -->
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <Reference URI="">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <DigestValue>DEMO-DIGEST-NOT-CRYPTOGRAPHICALLY-VALID</DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue>DEMO-RSA-SHA256-NOT-CRYPTOGRAPHICALLY-VALID-CMS0053-PROTOTYPE</SignatureValue>
+    <KeyInfo>
+      <X509Data>
+        <X509SubjectName>CN=Valley Orthopedic Group, OID.2.16.840.1.113883.4.6=5551234567, O=Valley Orthopedic Group, C=US</X509SubjectName>
+        <X509Certificate>DEMO-CERTIFICATE-NOT-REAL-CMS0053-PROTOTYPE</X509Certificate>
+      </X509Data>
+    </KeyInfo>
+  </Signature>
 </ClinicalDocument>

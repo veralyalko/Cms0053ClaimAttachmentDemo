@@ -267,6 +267,7 @@ Every placeholder is marked in code with a comment tag so they are easy to find 
 | `[X12-837-LINKAGE-PLACEHOLDER]` | `ClaimMatchingService.cs` | Supplement name/NPI matching with the X12 837 Internal Control Number (ICN) for exact claim linkage |
 | `[SCHEMATRON-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace hand-coded LINQ-to-XML assertions with compiled HL7 C-CDA Schematron XSLT execution (Saxon-HE) against the full official rule set |
 | `[NPPES-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace mock dictionary lookup with HTTP call to `https://npiregistry.cms.hhs.gov/api/?number={npi}&version=2.1` to verify NPI exists and is actively enrolled |
+| `[XMLDSIG-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace structural XMLDSig check with cryptographic RSA-SHA256 signature verification using the X.509 certificate in `<KeyInfo>`, validated against a trusted CA or HISP DirectTrust bundle, including certificate chain validation and CRL/OCSP revocation check |
 
 ---
 
