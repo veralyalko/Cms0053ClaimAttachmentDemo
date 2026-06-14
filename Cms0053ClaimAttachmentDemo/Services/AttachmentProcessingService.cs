@@ -326,8 +326,8 @@ public partial class AttachmentProcessingService(
             .FirstOrDefaultAsync();
 
         if (hashMatch is not null)
-            errors.Add($"Duplicate file: this exact document was already received " +
-                       $"(Attachment #{hashMatch.Id}, submitted {hashMatch.SubmittedAt:MM/dd/yyyy HH:mm} UTC).");
+            warnings.Add($"Duplicate file: this exact document was already received " +
+                         $"(Attachment #{hashMatch.Id}, submitted {hashMatch.SubmittedAt:MM/dd/yyyy HH:mm} UTC).");
 
         // Same provider + patient + service date + document type already accepted — warning only,
         // since a legitimately different file may cover the same encounter.
