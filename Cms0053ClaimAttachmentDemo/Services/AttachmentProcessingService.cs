@@ -44,6 +44,18 @@ public partial class AttachmentProcessingService(
         "text/xml", "application/xml"
     ];
 
+    private static readonly IReadOnlyDictionary<string, string[]> ExpectedExtensionsByMimeType =
+        new Dictionary<string, string[]>
+        {
+            ["application/pdf"] = [".pdf"],
+            ["image/jpeg"]      = [".jpg", ".jpeg"],
+            ["image/png"]       = [".png"],
+            ["image/tiff"]      = [".tif", ".tiff"],
+            ["text/plain"]      = [".txt"],
+            ["text/xml"]        = [".xml"],
+            ["application/xml"] = [".xml"],
+        };
+
     private static readonly XNamespace CdaNs = "urn:hl7-org:v3";
 
     // LOINC codes that C-CDA <code> must carry for each submitted DocumentType label.
@@ -236,6 +248,7 @@ public partial class AttachmentProcessingService(
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, attachment.PatientDOB,
             serviceDate, documentType, errors, warnings);
         ValidateMagicBytes(fileStorage.GetFilePath(attachment.StoredFileName), contentType, errors);
+        ValidateFileExtension(fileName, contentType, warnings);
         ValidateNpi(providerNPI, errors);
 
         // C-CDA structural, template, and identity validation for XML submissions
@@ -305,6 +318,10 @@ public partial class AttachmentProcessingService(
         attachment.Status = AttachmentStatus.Matched;
         AddHistory(attachment.Id, AttachmentStatus.Validated, AttachmentStatus.Matched,
             $"Matched to claim {matchedClaim.ClaimNumber}");
+
+        if (matchedClaim.Status == "Closed")
+            warnings.Add($"Matched claim {matchedClaim.ClaimNumber} is Closed. " +
+                "Attachments for closed claims may not be actionable; manual review recommended.");
 
         attachment.Status = AttachmentStatus.Accepted;
         AddHistory(attachment.Id, AttachmentStatus.Matched, AttachmentStatus.Accepted,
@@ -424,7 +441,11 @@ public partial class AttachmentProcessingService(
         if (string.IsNullOrWhiteSpace(documentType))
             errors.Add("Document type is required.");
 
-        if (patientDOB.HasValue)
+        if (!patientDOB.HasValue)
+        {
+            warnings.Add("Patient date of birth was not provided. Supplying DOB improves claim matching accuracy.");
+        }
+        else
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
             if (patientDOB.Value > today)
@@ -469,6 +490,15 @@ public partial class AttachmentProcessingService(
                        "The file may be corrupt or its extension mislabeled.");
     }
 
+    private static void ValidateFileExtension(string fileName, string contentType, List<string> warnings)
+    {
+        if (!ExpectedExtensionsByMimeType.TryGetValue(contentType, out var expected)) return;
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        if (!expected.Contains(ext))
+            warnings.Add($"File extension '{(string.IsNullOrEmpty(ext) ? "(none)" : ext)}' is inconsistent " +
+                $"with declared MIME type '{contentType}'. Expected: {string.Join(", ", expected)}.");
+    }
+
     private static void ValidateCcda(
         string filePath, string documentType,
         string patientName, DateOnly? patientDOB, string providerNPI, DateOnly serviceDate,
@@ -499,6 +529,11 @@ public partial class AttachmentProcessingService(
         if (doc.Root.Element(CdaNs + "author") is null)       errors.Add("C-CDA: missing required <author> element.");
         if (doc.Root.Element(CdaNs + "custodian") is null)    errors.Add("C-CDA: missing required <custodian> element.");
         if (doc.Root.Element(CdaNs + "effectiveTime") is null) errors.Add("C-CDA: missing required <effectiveTime> element.");
+
+        var recordTargetCount = doc.Root.Elements(CdaNs + "recordTarget").Count();
+        if (recordTargetCount > 1)
+            warnings.Add($"C-CDA: {recordTargetCount} <recordTarget> elements found. " +
+                "A standard C-CDA document should have exactly one patient record target.");
 
         var hasUsRealmTemplate = doc.Root.Elements(CdaNs + "templateId")
             .Any(t => t.Attribute("root")?.Value == "2.16.840.1.113883.10.20.22.1.1");
@@ -541,6 +576,19 @@ public partial class AttachmentProcessingService(
                     errors.Add($"C-CDA template: required section '{display}' (LOINC {code}) is missing.");
             }
         }
+
+        // Sections with a missing or empty <text> element lack human-readable content.
+        var emptySectionCodes = doc.Descendants(CdaNs + "section")
+            .Where(s => s.Element(CdaNs + "code")?.Attribute("code") is not null)
+            .Where(s => {
+                var textEl = s.Element(CdaNs + "text");
+                return textEl is null || string.IsNullOrWhiteSpace(textEl.Value);
+            })
+            .Select(s => s.Element(CdaNs + "code")!.Attribute("code")!.Value)
+            .ToList();
+        if (emptySectionCodes.Count > 0)
+            warnings.Add($"C-CDA: section(s) [{string.Join(", ", emptySectionCodes)}] have missing or empty <text> content. " +
+                "Human-readable narrative is required for clinical review.");
 
         // Section code system: each coded section should declare the LOINC OID.
         var nonLoinc = doc.Descendants(CdaNs + "section")
