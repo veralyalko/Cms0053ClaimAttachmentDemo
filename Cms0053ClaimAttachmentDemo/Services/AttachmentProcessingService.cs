@@ -92,6 +92,17 @@ public partial class AttachmentProcessingService(
             ["5551234567"] = Convert.FromBase64String("MIIDWTCCAkGgAwIBAgIJAJuDAdkIv+mjMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNVBAYTAlVTMSAwHgYDVQQKExdWYWxsZXkgT3J0aG9wZWRpYyBHcm91cDEZMBcGCWCGSAGG+VsEBhMKNTU1MTIzNDU2NzEgMB4GA1UEAxMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAwHhcNMjYwNjEzMDI1MjE4WhcNMjkwNjE0MDI1MjE4WjBsMQswCQYDVQQGEwJVUzEgMB4GA1UEChMXVmFsbGV5IE9ydGhvcGVkaWMgR3JvdXAxGTAXBglghkgBhvlbBAYTCjU1NTEyMzQ1NjcxIDAeBgNVBAMTF1ZhbGxleSBPcnRob3BlZGljIEdyb3VwMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAslDbIXr8H7SnjSCKfbekGvWzJNPzAdajHs1BKHZIRdhcF5LGaHVGu0UURHpuaJUrNyJfqhRezz2jyNtS4/iI05BTYgd68m0Y/abfMYWTTFzwzVXbfZXFkXRSSZXFBBk/OS4ayFHSyppA7EPy49uMmIwjv0fd9Ql9TCu9M9JG6pzbBg46KElF2zD42/SVeRk6sn+soIKiwKEnBtDlPTSu54guK2ddtIfoNHCZo1qPOkLj33SHRbEc0IUQhVYJjpvBdFTYBWAFCdl3p7xFIr/DoM1qjNrYzKNHKL2x5Ll80MzVy5/2F1FCFzWS1eA0O7A9fpzJ7aV36m7ljvZMxtLLVwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCLDS7Z1cyRgbb+Cw5ucMbuI4wdF9zZMq0XR80DoPYPLnlMmpbl9tiZIc53Ox6xQnvp0xLBzb7t3DN9hXk0LSeuZrHatPPE16LOaUqvA+IDOg+seVHamrqZLemGYzOKaXO6JOxctZwghkyj8Kg2ff8++Msceu/lv0h5R1nukK2eaFAG8YcYRKLPcerSBkj5pZHRtmPx11eoTqRRjgd03zH9rijR/w67zx8ATvhveo9qFPpI5Gn/sn1D3QdBvf2GqQrH5s/hKGAd7gn992uCU1MpF+f5ARtS3rRjaiHmaKb026XPT7MY7gaLfEQ8Bj6BdE4Cl4P45EgMaddPBHbavC6X"),
         };
 
+    // Algorithms rejected as cryptographically weak per NIST SP 800-131A and IHE DSG requirements.
+    private static readonly HashSet<string> WeakAlgorithmUris = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "http://www.w3.org/2000/09/xmldsig#sha1",
+        "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+        "http://www.w3.org/2000/09/xmldsig#dsa-sha1",
+        "http://www.w3.org/2000/09/xmldsig#hmac-sha1",
+        "http://www.w3.org/2001/04/xmldsig-more#md5",
+        "http://www.w3.org/2001/04/xmldsig-more#rsa-md5",
+    };
+
     // SHALL-conformance section assertions per document LOINC, mirroring C-CDA R2.1 Schematron rules.
     // [SCHEMATRON-PLACEHOLDER] In production, replace with compiled HL7 C-CDA Schematron XSLT (Saxon-HE).
     private static readonly IReadOnlyDictionary<string, (string Code, string Display)[]> RequiredSectionsByLoinc =
@@ -664,6 +675,7 @@ public partial class AttachmentProcessingService(
         List<string> errors, List<string> warnings)
     {
         const string algorithm = "RSA-SHA256 / XMLDSig Enveloped / C14N";
+        const string dsigNs = "http://www.w3.org/2000/09/xmldsig#";
 
         if (!ProviderCertificates.TryGetValue(providerNPI, out var certBytes))
         {
@@ -676,11 +688,13 @@ public partial class AttachmentProcessingService(
         try { xmlDoc.Load(filePath); }
         catch { return new SignatureProof(false, algorithm, null, null, null, null, "Failed to parse XML"); }
 
-        var sigEl = xmlDoc
-            .GetElementsByTagName("Signature", "http://www.w3.org/2000/09/xmldsig#")
-            .OfType<XmlElement>()
-            .FirstOrDefault();
+        // Rule 4: multiple <Signature> elements — warn and verify only the first.
+        var allSigs = xmlDoc.GetElementsByTagName("Signature", dsigNs).OfType<XmlElement>().ToList();
+        if (allSigs.Count > 1)
+            warnings.Add($"Document contains {allSigs.Count} <Signature> elements. " +
+                "Only the first was verified; multiple signatures may indicate conflicting document versions.");
 
+        var sigEl = allSigs.FirstOrDefault();
         if (sigEl is null)
         {
             warnings.Add("Document does not contain an XMLDSig electronic signature. " +
@@ -692,25 +706,79 @@ public partial class AttachmentProcessingService(
 
         var cert = X509CertificateLoader.LoadCertificate(certBytes);
         var rsaKey = cert.GetRSAPublicKey()!;
-        var thumbprint = cert.GetCertHashString(System.Security.Cryptography.HashAlgorithmName.SHA256);
+        var thumbprint = cert.GetCertHashString(HashAlgorithmName.SHA256);
+        var notBefore = cert.NotBefore.ToUniversalTime();
+        var notAfter  = cert.NotAfter.ToUniversalTime();
 
+        // Rule 1: certificate validity window.
+        var now = DateTime.UtcNow;
+        if (now < notBefore)
+        {
+            errors.Add($"Signature certificate is not yet valid (valid from {notBefore:MM/dd/yyyy}). " +
+                "The certificate cannot be used before its validity period begins.");
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
+                $"Certificate not yet valid — NotBefore is {notBefore:MM/dd/yyyy}");
+        }
+        if (now > notAfter)
+        {
+            errors.Add($"Signature certificate expired {notAfter:MM/dd/yyyy}. " +
+                "Documents must be signed with a currently valid certificate.");
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
+                $"Certificate expired — NotAfter was {notAfter:MM/dd/yyyy}");
+        }
+
+        // Rule 2: algorithm strength — reject SHA-1, MD5, and other weak algorithms.
+        var sigMethodAlg   = sigEl.GetElementsByTagName("SignatureMethod", dsigNs)
+            .OfType<XmlElement>().FirstOrDefault()?.GetAttribute("Algorithm") ?? "";
+        var digestMethodAlg = sigEl.GetElementsByTagName("DigestMethod", dsigNs)
+            .OfType<XmlElement>().FirstOrDefault()?.GetAttribute("Algorithm") ?? "";
+
+        bool hasWeakAlgorithm = false;
+        if (!string.IsNullOrEmpty(sigMethodAlg) && WeakAlgorithmUris.Contains(sigMethodAlg))
+        {
+            errors.Add($"Signature algorithm '{sigMethodAlg}' is cryptographically weak. " +
+                "RSA-SHA256 minimum required (NIST SP 800-131A).");
+            hasWeakAlgorithm = true;
+        }
+        if (!string.IsNullOrEmpty(digestMethodAlg) && WeakAlgorithmUris.Contains(digestMethodAlg))
+        {
+            errors.Add($"Digest algorithm '{digestMethodAlg}' is cryptographically weak. " +
+                "SHA-256 minimum required (NIST SP 800-131A).");
+            hasWeakAlgorithm = true;
+        }
+
+        // Rule 3: reference URI must be empty string (enveloped, whole-document coverage).
+        var badRefs = sigEl.GetElementsByTagName("Reference", dsigNs)
+            .OfType<XmlElement>()
+            .Where(r => r.GetAttribute("URI") != "")
+            .ToList();
+        if (badRefs.Count > 0)
+        {
+            var uris = string.Join(", ", badRefs.Select(r => $"\"{r.GetAttribute("URI")}\""));
+            errors.Add($"Signature reference URI(s) {uris} do not use enveloped coverage (expected URI=\"\"). " +
+                "The signature must cover the entire document, not a fragment.");
+        }
+
+        // Do not trust CheckSignature if algorithm or reference is invalid.
+        if (hasWeakAlgorithm || badRefs.Count > 0)
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
+                "Signature rejected: unacceptable algorithm or non-enveloped reference");
+
+        // Cryptographic verification.
         var signedXml = new SignedXml(xmlDoc);
         signedXml.LoadXml(sigEl);
-
         if (!signedXml.CheckSignature(rsaKey))
         {
             errors.Add("Electronic signature verification failed: the RSA-SHA256 signature is " +
                 "invalid. The document may have been tampered with after signing.");
-            return new SignatureProof(false, algorithm, cert.Subject, thumbprint,
-                cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(),
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
                 "RSA-SHA256 CheckSignature returned false — document content does not match signature");
         }
 
+        // NPI cross-check from certificate subject carried in <KeyInfo>.
         var subjectName = sigEl
-            .GetElementsByTagName("X509SubjectName", "http://www.w3.org/2000/09/xmldsig#")
-            .OfType<XmlElement>()
-            .FirstOrDefault()?.InnerText;
-
+            .GetElementsByTagName("X509SubjectName", dsigNs)
+            .OfType<XmlElement>().FirstOrDefault()?.InnerText;
         if (subjectName is not null)
         {
             var npiMatch = NpiInCertRegex().Match(subjectName);
@@ -718,14 +786,24 @@ public partial class AttachmentProcessingService(
             {
                 errors.Add($"Signature certificate NPI ({npiMatch.Groups[1].Value}) does not match " +
                     $"submitted provider NPI ({providerNPI}). The document was signed by a different provider.");
-                return new SignatureProof(false, algorithm, cert.Subject, thumbprint,
-                    cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(),
+                return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
                     $"Certificate NPI {npiMatch.Groups[1].Value} does not match submitted NPI {providerNPI}");
             }
         }
 
-        return new SignatureProof(true, algorithm, cert.Subject, thumbprint,
-            cert.NotBefore.ToUniversalTime(), cert.NotAfter.ToUniversalTime(), null);
+        // Rule 5: signing time recency — warn if SigningTime present and older than 30 days.
+        var signingTimeEl = sigEl.SelectSingleNode(".//*[local-name()='SigningTime']") as XmlElement;
+        if (signingTimeEl is not null &&
+            DateTime.TryParse(signingTimeEl.InnerText, null,
+                System.Globalization.DateTimeStyles.RoundtripKind, out var signingTime))
+        {
+            var ageDays = (now - signingTime.ToUniversalTime()).TotalDays;
+            if (ageDays > 30)
+                warnings.Add($"Document was signed {(int)ageDays} days ago ({signingTime:MM/dd/yyyy}). " +
+                    "Verify this is not a reused prior-period submission.");
+        }
+
+        return new SignatureProof(true, algorithm, cert.Subject, thumbprint, notBefore, notAfter, null);
     }
 
     private record SignatureProof(
