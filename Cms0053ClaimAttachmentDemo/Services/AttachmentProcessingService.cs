@@ -413,10 +413,14 @@ public partial class AttachmentProcessingService(
         var req = await db.AttachmentRequests
             .AsNoTracking()
             .Where(r => r.Id == attachment.AttachmentRequestId.Value)
-            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber, r.DueDate, r.ClaimId })
+            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber, r.DueDate, r.ClaimId, r.Status })
             .FirstOrDefaultAsync();
 
         if (req is null) return;
+
+        if (req.Status != AttachmentRequestStatus.Pending)
+            errors.Add($"Attachment request {req.TrackingNumber} is '{req.Status}' and cannot accept new attachments. " +
+                "Contact the payer if resubmission is needed.");
 
         if (!string.Equals(req.DocumentTypeRequested, documentType, StringComparison.OrdinalIgnoreCase))
             errors.Add(
@@ -622,6 +626,13 @@ public partial class AttachmentProcessingService(
             warnings.Add($"C-CDA: <languageCode code=\"{langEl.Attribute("code")?.Value}\"> is not 'en-US'. " +
                 "US-realm C-CDA documents must declare en-US.");
 
+        var realmCodeEl = doc.Root.Element(CdaNs + "realmCode");
+        if (realmCodeEl is null)
+            warnings.Add("C-CDA: missing <realmCode> element (expected code=\"US\" for US-realm documents).");
+        else if (!string.Equals(realmCodeEl.Attribute("code")?.Value, "US", StringComparison.OrdinalIgnoreCase))
+            warnings.Add($"C-CDA: <realmCode code=\"{realmCodeEl.Attribute("code")?.Value}\"> is not 'US'. " +
+                "US-realm C-CDA documents must declare realmCode code=\"US\".");
+
         if (doc.Root.Element(CdaNs + "confidentialityCode") is null)
             warnings.Add("C-CDA: missing <confidentialityCode> element.");
 
@@ -637,6 +648,26 @@ public partial class AttachmentProcessingService(
         if (authorsWithoutTime.Count > 0)
             warnings.Add($"C-CDA: {authorsWithoutTime.Count} <author> element(s) are missing a <time> element. " +
                 "C-CDA R2.1 requires each author to declare a participation time.");
+
+        var authorsWithoutId = doc.Root.Elements(CdaNs + "author")
+            .Where(a => !(a.Element(CdaNs + "assignedAuthor")?
+                           .Elements(CdaNs + "id").Any() ?? false))
+            .ToList();
+        if (authorsWithoutId.Count > 0)
+            warnings.Add($"C-CDA: {authorsWithoutId.Count} <author><assignedAuthor> element(s) have no <id>. " +
+                "Each author must have at least one identifier (e.g. NPI OID block).");
+
+        var custodianNameEl = doc.Root
+            .Element(CdaNs + "custodian")?
+            .Element(CdaNs + "assignedCustodian")?
+            .Element(CdaNs + "representedCustodianOrganization")?
+            .Element(CdaNs + "name");
+        if (doc.Root.Element(CdaNs + "custodian") is not null && custodianNameEl is null)
+            warnings.Add("C-CDA: <custodian> is missing <representedCustodianOrganization><name>. " +
+                "The custodian organization name is required per C-CDA R2.1.");
+        else if (custodianNameEl is not null && string.IsNullOrWhiteSpace(custodianNameEl.Value))
+            warnings.Add("C-CDA: <custodian><representedCustodianOrganization><name> is empty. " +
+                "The custodian organization name must not be blank.");
 
         var recordTargetCount = doc.Root.Elements(CdaNs + "recordTarget").Count();
         if (recordTargetCount > 1)
@@ -775,13 +806,21 @@ public partial class AttachmentProcessingService(
                        $"does not match submitted provider NPI ({providerNPI}).");
 
         var effectiveTimeStr = doc.Root.Element(CdaNs + "effectiveTime")?.Attribute("value")?.Value;
-        if (effectiveTimeStr is { Length: >= 8 } &&
-            DateOnly.TryParseExact(effectiveTimeStr[..8], "yyyyMMdd", out var ccdaEffective))
+        if (effectiveTimeStr is not null)
         {
-            var daysDiff = Math.Abs(ccdaEffective.DayNumber - serviceDate.DayNumber);
-            if (daysDiff > 30)
-                warnings.Add($"C-CDA: document effective date ({ccdaEffective:MM/dd/yyyy}) differs from " +
-                             $"submitted service date ({serviceDate:MM/dd/yyyy}) by {daysDiff} days.");
+            if (effectiveTimeStr.Length >= 8 &&
+                DateOnly.TryParseExact(effectiveTimeStr[..8], "yyyyMMdd", out var ccdaEffective))
+            {
+                var daysDiff = Math.Abs(ccdaEffective.DayNumber - serviceDate.DayNumber);
+                if (daysDiff > 30)
+                    warnings.Add($"C-CDA: document effective date ({ccdaEffective:MM/dd/yyyy}) differs from " +
+                                 $"submitted service date ({serviceDate:MM/dd/yyyy}) by {daysDiff} days.");
+            }
+            else
+            {
+                warnings.Add($"C-CDA: <effectiveTime value=\"{effectiveTimeStr}\"> is not in a recognized date format. " +
+                    "Expected yyyyMMdd or yyyyMMddHHmmss±zzzz.");
+            }
         }
 
         if (doc.Root.Element(CdaNs + "component")?.Element(CdaNs + "structuredBody") is null)
