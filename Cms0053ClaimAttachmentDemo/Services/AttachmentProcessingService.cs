@@ -413,7 +413,7 @@ public partial class AttachmentProcessingService(
         var req = await db.AttachmentRequests
             .AsNoTracking()
             .Where(r => r.Id == attachment.AttachmentRequestId.Value)
-            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber, r.DueDate })
+            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber, r.DueDate, r.ClaimId })
             .FirstOrDefaultAsync();
 
         if (req is null) return;
@@ -434,6 +434,26 @@ public partial class AttachmentProcessingService(
         if (priorCount > 0)
             warnings.Add($"A prior attachment was already submitted for request {req.TrackingNumber}. " +
                 $"This is submission #{priorCount + 1} for the same request.");
+
+        var claim = await db.Claims
+            .AsNoTracking()
+            .Where(c => c.Id == req.ClaimId)
+            .Select(c => new { c.ProviderNPI, c.ServiceDate })
+            .FirstOrDefaultAsync();
+
+        if (claim is not null)
+        {
+            if (!string.Equals(claim.ProviderNPI, attachment.ProviderNPI, StringComparison.Ordinal))
+                errors.Add($"Provider NPI mismatch: request {req.TrackingNumber} is linked to a claim " +
+                    $"for NPI {claim.ProviderNPI}, but submitted NPI is {attachment.ProviderNPI}. " +
+                    "The attachment must be submitted by the billing provider on the claim.");
+
+            var daysDiff = Math.Abs(attachment.ServiceDate.DayNumber - claim.ServiceDate.DayNumber);
+            if (daysDiff > 7)
+                warnings.Add($"Service date {attachment.ServiceDate:MM/dd/yyyy} differs from claim service date " +
+                    $"{claim.ServiceDate:MM/dd/yyyy} by {daysDiff} days (request {req.TrackingNumber}). " +
+                    "Claim matching requires dates within ±7 days.");
+        }
     }
 
     private async Task CheckDuplicatesAsync(
@@ -611,6 +631,13 @@ public partial class AttachmentProcessingService(
         if (doc.Root.Element(CdaNs + "custodian") is null)    errors.Add("C-CDA: missing required <custodian> element.");
         if (doc.Root.Element(CdaNs + "effectiveTime") is null) errors.Add("C-CDA: missing required <effectiveTime> element.");
 
+        var authorsWithoutTime = doc.Root.Elements(CdaNs + "author")
+            .Where(a => a.Element(CdaNs + "time") is null)
+            .ToList();
+        if (authorsWithoutTime.Count > 0)
+            warnings.Add($"C-CDA: {authorsWithoutTime.Count} <author> element(s) are missing a <time> element. " +
+                "C-CDA R2.1 requires each author to declare a participation time.");
+
         var recordTargetCount = doc.Root.Elements(CdaNs + "recordTarget").Count();
         if (recordTargetCount > 1)
             warnings.Add($"C-CDA: {recordTargetCount} <recordTarget> elements found. " +
@@ -634,6 +661,10 @@ public partial class AttachmentProcessingService(
             errors.Add("C-CDA: <code> element is missing the LOINC 'code' attribute.");
             return;
         }
+
+        if (codeEl.Attribute("codeSystem")?.Value != "2.16.840.1.113883.6.1")
+            warnings.Add($"C-CDA: document <code> is missing codeSystem=\"2.16.840.1.113883.6.1\" (LOINC OID). " +
+                $"Found: '{codeEl.Attribute("codeSystem")?.Value ?? "(none)"}'.");
 
         // Cross-validate LOINC in the document against the submitted DocumentType metadata field.
         if (LoincByDocumentType.TryGetValue(documentType, out var expectedLoincs) &&
@@ -692,10 +723,21 @@ public partial class AttachmentProcessingService(
                          "the LOINC codeSystem OID (2.16.840.1.113883.6.1).");
 
         // Identity cross-checks: C-CDA content vs submitted metadata
-        var patientEl = doc.Root
+        var patientRoleEl = doc.Root
             .Element(CdaNs + "recordTarget")?
-            .Element(CdaNs + "patientRole")?
-            .Element(CdaNs + "patient");
+            .Element(CdaNs + "patientRole");
+
+        if (patientRoleEl is not null)
+        {
+            var roleIds = patientRoleEl.Elements(CdaNs + "id").ToList();
+            if (roleIds.Count == 0)
+                warnings.Add("C-CDA: <patientRole> is missing at least one <id> element. " +
+                    "A patient identifier (e.g. MRN) is required.");
+            else if (roleIds.All(id => string.IsNullOrEmpty(id.Attribute("root")?.Value)))
+                warnings.Add("C-CDA: <patientRole><id> element(s) are missing the required 'root' attribute (OID or UUID).");
+        }
+
+        var patientEl = patientRoleEl?.Element(CdaNs + "patient");
 
         if (patientEl is not null)
         {
@@ -893,6 +935,31 @@ public partial class AttachmentProcessingService(
                     $"submitted provider NPI ({providerNPI}). The document was signed by a different provider.");
                 return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
                     $"Certificate NPI {npiMatch.Groups[1].Value} does not match submitted NPI {providerNPI}");
+            }
+        }
+
+        // Verify the X509Certificate embedded in KeyInfo matches the pinned provider certificate.
+        var embeddedCertEl = sigEl
+            .GetElementsByTagName("X509Certificate", dsigNs)
+            .OfType<XmlElement>().FirstOrDefault();
+        if (embeddedCertEl is not null)
+        {
+            try
+            {
+                var embeddedBytes = Convert.FromBase64String(embeddedCertEl.InnerText.Trim());
+                var embeddedCert  = X509CertificateLoader.LoadCertificate(embeddedBytes);
+                var embeddedThumb = embeddedCert.GetCertHashString(HashAlgorithmName.SHA256);
+                if (!string.Equals(embeddedThumb, thumbprint, StringComparison.OrdinalIgnoreCase))
+                {
+                    errors.Add($"KeyInfo certificate does not match the pinned provider certificate for NPI {providerNPI}. " +
+                        "The embedded certificate may have been substituted.");
+                    return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
+                        "KeyInfo X509Certificate thumbprint does not match pinned certificate");
+                }
+            }
+            catch
+            {
+                warnings.Add("KeyInfo contains an X509Certificate element that could not be parsed.");
             }
         }
 
