@@ -267,7 +267,7 @@ Every placeholder is marked in code with a comment tag so they are easy to find 
 | `[X12-837-LINKAGE-PLACEHOLDER]` | `ClaimMatchingService.cs` | Supplement name/NPI matching with the X12 837 Internal Control Number (ICN) for exact claim linkage |
 | `[SCHEMATRON-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace hand-coded LINQ-to-XML assertions with compiled HL7 C-CDA Schematron XSLT execution (Saxon-HE) against the full official rule set |
 | `[NPPES-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace mock dictionary lookup with HTTP call to `https://npiregistry.cms.hhs.gov/api/?number={npi}&version=2.1` to verify NPI exists and is actively enrolled |
-| `[XMLDSIG-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Replace structural XMLDSig check with cryptographic RSA-SHA256 signature verification using the X.509 certificate in `<KeyInfo>`, validated against a trusted CA or HISP DirectTrust bundle, including certificate chain validation and CRL/OCSP revocation check |
+| `[XMLDSIG-PLACEHOLDER]` | `AttachmentProcessingService.cs` | Cryptographic RSA-SHA256 XMLDSig verification is already implemented (IHE DSG document-level signing, beyond CMS-0053-F baseline). In production: replace pinned self-signed certs with CA-issued certs from a HISP DirectTrust bundle or IHE Affinity Domain trust anchor; add X.509 chain validation and CRL/OCSP revocation. Note: CMS-0053-F non-repudiation for X12 275 transactions is handled at the AS2/S-MIME transport layer, not here. |
 
 ---
 

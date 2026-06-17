@@ -654,9 +654,12 @@ public partial class AttachmentProcessingService(
     }
 
     // Verifies the RSA-SHA256 enveloped XMLDSig signature cryptographically using the pinned
-    // provider certificate. Chain validation and CRL/OCSP are not performed here.
-    // [XMLDSIG-PLACEHOLDER] In production, add chain validation against a HISP DirectTrust bundle
-    // and OCSP/CRL revocation checks before trusting the certificate.
+    // provider certificate. This is a document-level non-repudiation check specific to C-CDA/XML
+    // payloads (IHE DSG profile). CMS-0053-F non-repudiation for X12 275 transactions is handled
+    // at the transport layer by AS2/S/MIME — see [X12-275-PLACEHOLDER].
+    // [XMLDSIG-PLACEHOLDER] In production, replace pinned self-signed certs with CA-issued
+    // certificates validated against a HISP DirectTrust bundle or IHE Affinity Domain trust anchor;
+    // add X.509 chain validation and CRL/OCSP revocation checks before trusting the certificate.
     private static SignatureProof ValidateSignature(string filePath, string providerNPI,
         List<string> errors, List<string> warnings)
     {
@@ -681,7 +684,9 @@ public partial class AttachmentProcessingService(
         if (sigEl is null)
         {
             warnings.Add("Document does not contain an XMLDSig electronic signature. " +
-                "In production, provider signatures are required for non-repudiation.");
+                "Document-level signing is an optional enhancement for C-CDA payloads beyond " +
+                "the baseline CMS-0053-F requirement; CMS-0053-F non-repudiation is satisfied " +
+                "at the X12 275 transaction level via AS2/S-MIME.");
             return new SignatureProof(false, algorithm, null, null, null, null, "No <Signature> element found");
         }
 
