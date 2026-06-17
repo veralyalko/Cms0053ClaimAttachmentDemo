@@ -116,6 +116,16 @@ public partial class AttachmentProcessingService(
             ["11488-4"] = [("10154-3", "Chief Complaint")],
         };
 
+    // C-CDA R2.1 document-level templateId OIDs by LOINC for document-type conformance.
+    private static readonly IReadOnlyDictionary<string, (string Oid, string Name)> DocumentTemplatesByLoinc =
+        new Dictionary<string, (string Oid, string Name)>
+        {
+            ["11504-8"] = ("2.16.840.1.113883.10.20.22.1.7", "Operative Note"),
+            ["34117-2"] = ("2.16.840.1.113883.10.20.22.1.9", "Progress Note"),
+            ["11514-3"] = ("2.16.840.1.113883.10.20.22.1.9", "Progress Note"),
+            ["11488-4"] = ("2.16.840.1.113883.10.20.22.1.4", "Consultation Note"),
+        };
+
     // [X12-275-PLACEHOLDER] In production, this method accepts a parsed X12 275 Transaction Set
     // envelope instead of an IFormFile + metadata. The binary attachment and loop data segments
     // (2000A/2000B/2000C/2100/2200) map directly to the fields populated below.
@@ -255,12 +265,12 @@ public partial class AttachmentProcessingService(
         var warnings = new List<string>();
 
         await CheckDuplicatesAsync(attachment, providerNPI, patientName, serviceDate, documentType, errors, warnings);
-        await CheckSolicitedDocumentTypeAsync(attachment, documentType, errors);
+        await CheckSolicitedDocumentTypeAsync(attachment, documentType, errors, warnings);
         Validate(fileName, contentType, fileSizeBytes, providerNPI, patientName, attachment.PatientDOB,
             serviceDate, documentType, errors, warnings);
         ValidateMagicBytes(fileStorage.GetFilePath(attachment.StoredFileName), contentType, errors);
         ValidateFileExtension(fileName, contentType, warnings);
-        ValidateNpi(providerNPI, errors);
+        ValidateNpi(providerNPI, errors, warnings);
 
         // C-CDA structural, template, and identity validation for XML submissions
         SignatureProof? sigProof = null;
@@ -363,26 +373,47 @@ public partial class AttachmentProcessingService(
         });
     }
 
-    private static void ValidateNpi(string providerNPI, List<string> errors)
+    private static void ValidateNpi(string providerNPI, List<string> errors, List<string> warnings)
     {
-        // Skip registry check if NPI already failed format validation.
         if (!NpiRegex().IsMatch(providerNPI))
             return;
+
+        if (!IsValidNpiLuhn(providerNPI))
+            warnings.Add($"Provider NPI {providerNPI} failed the NPPES Luhn check digit validation. " +
+                         "Verify the NPI is transcribed correctly.");
 
         if (!MockNpiRegistry.ContainsKey(providerNPI))
             errors.Add($"Provider NPI {providerNPI} was not found in the NPI registry. " +
                        "Verify the NPI is correct and active.");
     }
 
+    private static bool IsValidNpiLuhn(string npi)
+    {
+        // Prepend "80840" per NPPES specification and verify the 15-digit number passes Luhn.
+        var digits = ("80840" + npi).Select(c => c - '0').ToArray();
+        var sum = 0;
+        for (var i = digits.Length - 1; i >= 0; i--)
+        {
+            var d = digits[i];
+            if ((digits.Length - 1 - i) % 2 == 1)
+            {
+                d *= 2;
+                if (d > 9) d -= 9;
+            }
+            sum += d;
+        }
+        return sum % 10 == 0;
+    }
+
     private async Task CheckSolicitedDocumentTypeAsync(
-        ClaimAttachment attachment, string documentType, List<string> errors)
+        ClaimAttachment attachment, string documentType, List<string> errors, List<string> warnings)
     {
         if (attachment.AttachmentRequestId is null) return;
 
         var req = await db.AttachmentRequests
             .AsNoTracking()
             .Where(r => r.Id == attachment.AttachmentRequestId.Value)
-            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber })
+            .Select(r => new { r.DocumentTypeRequested, r.TrackingNumber, r.DueDate })
             .FirstOrDefaultAsync();
 
         if (req is null) return;
@@ -392,6 +423,17 @@ public partial class AttachmentProcessingService(
                 $"Document type mismatch: payer requested '{req.DocumentTypeRequested}' " +
                 $"(request {req.TrackingNumber}) but received '{documentType}'. " +
                 $"Please resubmit with the correct document type.");
+
+        if (req.DueDate < DateTime.UtcNow)
+            warnings.Add($"Attachment request {req.TrackingNumber} was due {req.DueDate:MM/dd/yyyy} and is overdue. " +
+                "Late attachments may not be accepted for claim adjudication.");
+
+        var priorCount = await db.ClaimAttachments
+            .CountAsync(a => a.AttachmentRequestId == attachment.AttachmentRequestId
+                          && a.Id != attachment.Id);
+        if (priorCount > 0)
+            warnings.Add($"A prior attachment was already submitted for request {req.TrackingNumber}. " +
+                $"This is submission #{priorCount + 1} for the same request.");
     }
 
     private async Task CheckDuplicatesAsync(
@@ -535,6 +577,34 @@ public partial class AttachmentProcessingService(
             return;
         }
 
+        var typeIdEl = doc.Root.Element(CdaNs + "typeId");
+        if (typeIdEl is null)
+            warnings.Add("C-CDA: missing <typeId> element (expected root=\"2.16.840.1.113883.1.3\" extension=\"POCD_HD000040\").");
+        else if (typeIdEl.Attribute("root")?.Value != "2.16.840.1.113883.1.3" ||
+                 typeIdEl.Attribute("extension")?.Value != "POCD_HD000040")
+            warnings.Add($"C-CDA: <typeId> has unexpected values " +
+                $"(root=\"{typeIdEl.Attribute("root")?.Value}\" extension=\"{typeIdEl.Attribute("extension")?.Value}\"); " +
+                "expected root=\"2.16.840.1.113883.1.3\" extension=\"POCD_HD000040\".");
+
+        var docIdEl = doc.Root.Element(CdaNs + "id");
+        if (docIdEl is null)
+            warnings.Add("C-CDA: missing document <id> element. A unique OID or UUID root attribute is required.");
+        else if (string.IsNullOrEmpty(docIdEl.Attribute("root")?.Value))
+            warnings.Add("C-CDA: document <id> is missing the required 'root' attribute (OID or UUID).");
+
+        if (doc.Root.Element(CdaNs + "title") is null)
+            warnings.Add("C-CDA: missing <title> element. A human-readable document title is required.");
+
+        var langEl = doc.Root.Element(CdaNs + "languageCode");
+        if (langEl is null)
+            warnings.Add("C-CDA: missing <languageCode> element.");
+        else if (!string.Equals(langEl.Attribute("code")?.Value, "en-US", StringComparison.OrdinalIgnoreCase))
+            warnings.Add($"C-CDA: <languageCode code=\"{langEl.Attribute("code")?.Value}\"> is not 'en-US'. " +
+                "US-realm C-CDA documents must declare en-US.");
+
+        if (doc.Root.Element(CdaNs + "confidentialityCode") is null)
+            warnings.Add("C-CDA: missing <confidentialityCode> element.");
+
         // Required CDA R2 header elements
         if (doc.Root.Element(CdaNs + "recordTarget") is null) errors.Add("C-CDA: missing required <recordTarget> element.");
         if (doc.Root.Element(CdaNs + "author") is null)       errors.Add("C-CDA: missing required <author> element.");
@@ -571,6 +641,15 @@ public partial class AttachmentProcessingService(
         {
             errors.Add($"C-CDA: document type '{documentType}' expects LOINC " +
                        $"{string.Join(" or ", expectedLoincs)}, but <code> contains {docLoinc}.");
+        }
+
+        if (DocumentTemplatesByLoinc.TryGetValue(docLoinc, out var expectedTemplate))
+        {
+            var hasDocTemplate = doc.Root.Elements(CdaNs + "templateId")
+                .Any(t => t.Attribute("root")?.Value == expectedTemplate.Oid);
+            if (!hasDocTemplate)
+                warnings.Add($"C-CDA template: document-type templateId for {expectedTemplate.Name} " +
+                    $"({expectedTemplate.Oid}) is missing. Required for C-CDA R2.1 conformance.");
         }
 
         // Template conformance: check that required sections are present for this document type.
@@ -662,6 +741,10 @@ public partial class AttachmentProcessingService(
                 warnings.Add($"C-CDA: document effective date ({ccdaEffective:MM/dd/yyyy}) differs from " +
                              $"submitted service date ({serviceDate:MM/dd/yyyy}) by {daysDiff} days.");
         }
+
+        if (doc.Root.Element(CdaNs + "component")?.Element(CdaNs + "structuredBody") is null)
+            warnings.Add("C-CDA: no <structuredBody> found under <component>. " +
+                "Structured body with coded sections is required for computable claim attachment content.");
     }
 
     // Verifies the RSA-SHA256 enveloped XMLDSig signature cryptographically using the pinned
@@ -709,6 +792,14 @@ public partial class AttachmentProcessingService(
         var thumbprint = cert.GetCertHashString(HashAlgorithmName.SHA256);
         var notBefore = cert.NotBefore.ToUniversalTime();
         var notAfter  = cert.NotAfter.ToUniversalTime();
+
+        if (rsaKey.KeySize < 2048)
+        {
+            errors.Add($"Signature certificate uses a {rsaKey.KeySize}-bit RSA key. " +
+                "A minimum of 2048 bits is required (NIST SP 800-131A).");
+            return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
+                $"RSA key size {rsaKey.KeySize} bits is below the 2048-bit minimum");
+        }
 
         // Rule 1: certificate validity window.
         var now = DateTime.UtcNow;
@@ -759,8 +850,22 @@ public partial class AttachmentProcessingService(
                 "The signature must cover the entire document, not a fragment.");
         }
 
+        // Rule 11: enveloped-signature transform must be present for whole-document references.
+        var missingTransformRefs = sigEl.GetElementsByTagName("Reference", dsigNs)
+            .OfType<XmlElement>()
+            .Where(r => r.GetAttribute("URI") == "")
+            .Where(r => !r.GetElementsByTagName("Transform", dsigNs)
+                          .OfType<XmlElement>()
+                          .Any(t => t.GetAttribute("Algorithm") ==
+                              "http://www.w3.org/2000/09/xmldsig#enveloped-signature"))
+            .ToList();
+        if (missingTransformRefs.Count > 0)
+            errors.Add("Signature reference is missing the required enveloped-signature transform " +
+                "(http://www.w3.org/2000/09/xmldsig#enveloped-signature). Without it, " +
+                "the <Signature> element is included in the digest and verification will fail.");
+
         // Do not trust CheckSignature if algorithm or reference is invalid.
-        if (hasWeakAlgorithm || badRefs.Count > 0)
+        if (hasWeakAlgorithm || badRefs.Count > 0 || missingTransformRefs.Count > 0)
             return new SignatureProof(false, algorithm, cert.Subject, thumbprint, notBefore, notAfter,
                 "Signature rejected: unacceptable algorithm or non-enveloped reference");
 
