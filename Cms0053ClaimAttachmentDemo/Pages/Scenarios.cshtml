@@ -1,0 +1,387 @@
+@page
+@{
+    ViewData["Title"] = "Demo Scenarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h2 fw-bold">Demo Scenarios</h1>
+        <p class="text-muted mb-0">Step-by-step scripts for each CMS-0053-F workflow — success and failure paths.</p>
+    </div>
+</div>
+
+<div class="alert alert-info mb-4">
+    <strong>Fresh deploy?</strong>
+    Go to <a href="/Payer/Dashboard" class="alert-link">Payer &rarr; Dashboard</a> and click
+    <strong>Pull from Clearinghouse</strong> before demoing Workflow 2.
+    Seeded attachments in <a href="/Payer/Attachments" class="alert-link">All Attachments</a>
+    already demonstrate every status (Accepted, ValidationFailed, MatchFailed, Rejected) without any manual steps.
+</div>
+
+@* ──────────────────────────────────────────────────────────────────────── *@
+@*  Seeded reference data                                                    *@
+@* ──────────────────────────────────────────────────────────────────────── *@
+
+<div class="card mb-5">
+    <div class="card-header fw-semibold">Seeded Reference Data</div>
+    <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Patient</th>
+                    <th>DOB</th>
+                    <th>NPI / Provider</th>
+                    <th>Service Date</th>
+                    <th>Claim</th>
+                </tr>
+            </thead>
+            <tbody class="small">
+                <tr><td>John Smith</td>     <td>03/15/1975</td><td class="font-monospace">1234567890</td><td>10/15/2025</td><td>CLM-2025-0001</td></tr>
+                <tr><td>Maria Garcia</td>   <td>07/22/1982</td><td class="font-monospace">1234567890</td><td>11/03/2025</td><td>CLM-2025-0002</td></tr>
+                <tr><td>Robert Johnson</td> <td>12/01/1960</td><td class="font-monospace">9876543210</td><td>09/28/2025</td><td>CLM-2025-0003</td></tr>
+                <tr><td>Linda Chen</td>     <td>05/14/1990</td><td class="font-monospace">9876543210</td><td>12/10/2025</td><td>CLM-2025-0004</td></tr>
+                <tr><td>James Wilson</td>   <td>08/30/1955</td><td class="font-monospace">5551234567</td><td>11/20/2025</td><td>CLM-2025-0005</td></tr>
+                <tr><td>Patricia Moore</td> <td>02/17/1948</td><td class="font-monospace">5551234567</td><td>12/05/2025</td><td>CLM-2025-0006</td></tr>
+                <tr><td>Sarah Thompson</td> <td>04/12/1988</td><td class="font-monospace">1234567890</td><td>10/22/2025</td><td>CLM-2025-0007</td></tr>
+                <tr><td>David Kim</td>      <td>09/03/1972</td><td class="font-monospace">9876543210</td><td>11/07/2025</td><td>CLM-2025-0008</td></tr>
+                <tr><td>Amanda Foster</td>  <td>01/28/1965</td><td class="font-monospace">5551234567</td><td>11/25/2025</td><td>CLM-2025-0009</td></tr>
+                <tr><td>Richard Torres</td> <td>06/15/1980</td><td class="font-monospace">1234567890</td><td>12/03/2025</td><td>CLM-2025-0010</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* ──────────────────────────────────────────────────────────────────────── *@
+@*  Workflow 1 — Solicited                                                   *@
+@* ──────────────────────────────────────────────────────────────────────── *@
+
+<h2 class="h4 fw-bold mb-1">
+    <span class="badge bg-primary me-2">Workflow 1</span>
+    Solicited Attachment
+</h2>
+<p class="text-muted mb-3">Payer creates a request &rarr; provider receives a secure upload link &rarr; provider uploads the document.</p>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-lg-6">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between">
+                Success path
+                <span class="badge bg-white text-success">Accepted</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Seeded pending request <strong>ATR-2025-0001</strong> asks for
+                    <em>Office Visit Notes</em> for <strong>Sarah Thompson</strong>.
+                </p>
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        Go to <a href="/Payer/Requests">Payer &rarr; Attachment Requests</a>.
+                        Find <strong>ATR-2025-0001</strong> (status: Pending).
+                    </li>
+                    <li class="mb-2">
+                        Click <strong>View</strong> &rarr; copy the <em>Secure Upload Link</em>.
+                        Open it in a new tab (simulates the provider receiving an email).
+                    </li>
+                    <li class="mb-2">
+                        <strong>Document Type:</strong> select <code>Office Visit Notes</code>
+                        (matches what the payer requested).
+                    </li>
+                    <li class="mb-2">
+                        <strong>Document File:</strong> upload any small file
+                        (.txt, .xml, .pdf — under 10 MB).
+                    </li>
+                    <li class="mb-2">
+                        <strong>Submitted By:</strong> enter any provider name.
+                    </li>
+                    <li>
+                        Click <strong>Submit Document</strong>.
+                        &rarr; Redirected to Attachment Detail &rarr; <span class="badge bg-success">Accepted</span>.
+                        Request ATR-2025-0001 is now <span class="badge bg-success">Fulfilled</span>.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100 border-danger">
+            <div class="card-header bg-danger text-white fw-semibold d-flex justify-content-between">
+                Failure — document type mismatch
+                <span class="badge bg-white text-danger">ValidationFailed</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Provider submits the wrong document type for request <strong>ATR-2025-0002</strong>
+                    (<em>Lab Results</em> for <strong>David Kim</strong>).
+                </p>
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        Go to <a href="/Payer/Requests">Attachment Requests</a>.
+                        Find <strong>ATR-2025-0002</strong> (status: Pending).
+                        Open its Secure Upload Link.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Document Type:</strong> select <code>Office Visit Notes</code>
+                        — deliberately <em>wrong</em> (request asks for "Lab Results").
+                    </li>
+                    <li class="mb-2">Upload any file. Enter Submitted By.</li>
+                    <li>
+                        Click <strong>Submit Document</strong>.
+                        &rarr; <span class="badge bg-danger">ValidationFailed</span>.<br />
+                        <span class="small text-muted">Error: "Document type mismatch: payer requested 'Lab Results' but received 'Office Visit Notes'."</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* ──────────────────────────────────────────────────────────────────────── *@
+@*  Workflow 2 — Clearinghouse                                               *@
+@* ──────────────────────────────────────────────────────────────────────── *@
+
+<h2 class="h4 fw-bold mb-1">
+    <span class="badge bg-primary me-2">Workflow 2</span>
+    Unsolicited via Clearinghouse
+</h2>
+<p class="text-muted mb-3">Provider submits to the mock clearinghouse &rarr; payer pulls &rarr; pipeline processes.</p>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-lg-6">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between">
+                Success path
+                <span class="badge bg-white text-success">Accepted</span>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        Go to <a href="/Clearinghouse/Submit">Clearinghouse &rarr; Submit Attachment</a>.
+                    </li>
+                    <li class="mb-2">
+                        Enter:<br />
+                        <strong>NPI:</strong> <code>9876543210</code><br />
+                        <strong>Document Type:</strong> <code>Operative Report</code><br />
+                        <strong>Patient Name:</strong> <code>Robert Johnson</code><br />
+                        <strong>Patient DOB:</strong> <code>12/01/1960</code><br />
+                        <strong>Service Date:</strong> <code>09/28/2025</code>
+                    </li>
+                    <li class="mb-2">Upload any file. Click <strong>Submit</strong>.</li>
+                    <li class="mb-2">
+                        Go to <a href="/Payer/Dashboard">Payer &rarr; Dashboard</a>.
+                        Click <strong>Pull from Clearinghouse</strong>.
+                    </li>
+                    <li>
+                        Go to <a href="/Payer/Attachments">All Attachments</a> &rarr;
+                        find the new record &rarr; <span class="badge bg-success">Accepted</span>
+                        matched to <strong>CLM-2025-0003</strong>.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark fw-semibold d-flex justify-content-between">
+                Failure — unknown patient
+                <span class="badge bg-white text-warning">MatchFailed</span>
+            </div>
+            <div class="card-body">
+                <ol class="mb-2">
+                    <li class="mb-2">
+                        Go to <a href="/Clearinghouse/Submit">Clearinghouse &rarr; Submit Attachment</a>.
+                    </li>
+                    <li class="mb-2">
+                        Enter:<br />
+                        <strong>NPI:</strong> <code>1234567890</code><br />
+                        <strong>Document Type:</strong> <code>Lab Results</code><br />
+                        <strong>Patient Name:</strong> <code>Unknown Patient</code><br />
+                        <strong>Service Date:</strong> <code>10/15/2025</code>
+                    </li>
+                    <li class="mb-2">Upload any file. Click <strong>Submit</strong>.</li>
+                    <li class="mb-2">
+                        Payer &rarr; Dashboard &rarr; <strong>Pull from Clearinghouse</strong>.
+                    </li>
+                    <li>
+                        &rarr; <span class="badge bg-warning text-dark">MatchFailed</span>.
+                        No claim found for "Unknown Patient" with NPI 1234567890.
+                    </li>
+                </ol>
+                <hr class="my-3" />
+                <p class="fw-semibold small mb-1">Alternate — bad NPI &rarr; <span class="badge bg-danger">ValidationFailed</span></p>
+                <p class="small mb-0">
+                    Use NPI <code>0000000000</code> (not in registry).
+                    After pull: "Provider NPI 0000000000 was not found in the NPI registry."
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* ──────────────────────────────────────────────────────────────────────── *@
+@*  Workflow 3 — Direct / EMR                                                *@
+@* ──────────────────────────────────────────────────────────────────────── *@
+
+<h2 class="h4 fw-bold mb-1">
+    <span class="badge bg-primary me-2">Workflow 3</span>
+    Unsolicited Direct / EMR Submission
+</h2>
+<p class="text-muted mb-3">Provider or EMR submits directly to the payer — no payer request, no clearinghouse.</p>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-lg-6">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between">
+                Success — seeded EMR document
+                <span class="badge bg-white text-success">Accepted</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Fastest success path — selects a pre-loaded C-CDA document that already
+                    matches a seeded claim.
+                </p>
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        Go to <a href="/Provider/DirectSubmit">Provider &rarr; Direct Submit</a>.
+                    </li>
+                    <li class="mb-2">
+                        Under <strong>Select from EMR</strong>, choose:<br />
+                        <code>Lab Results — John Smith (10/15/2025)</code>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Submitted By:</strong> enter any name (e.g., <code>Metro Health Portal</code>).
+                    </li>
+                    <li>
+                        Click <strong>Submit from EMR</strong>.
+                        &rarr; <span class="badge bg-success">Accepted</span>
+                        matched to <strong>CLM-2025-0001</strong>. C-CDA structure and
+                        XMLDSig signature verified.
+                    </li>
+                </ol>
+                <hr class="my-3" />
+                <p class="fw-semibold small mb-1">Alternate — file upload</p>
+                <ol class="small mb-0">
+                    <li class="mb-1">Upload File tab.</li>
+                    <li class="mb-1">NPI: <code>1234567890</code>, Doc Type: <code>Lab Results</code>, Patient: <code>John Smith</code>, DOB: <code>03/15/1975</code>, Service Date: <code>10/15/2025</code>.</li>
+                    <li>Upload any .txt file &rarr; <span class="badge bg-success">Accepted</span>.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-danger mb-4">
+            <div class="card-header bg-danger text-white fw-semibold d-flex justify-content-between">
+                Failure — patient name doesn't match any claim
+                <span class="badge bg-white text-danger">MatchFailed</span>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        <a href="/Provider/DirectSubmit">Provider &rarr; Direct Submit</a> &rarr; Upload File tab.
+                    </li>
+                    <li class="mb-2">
+                        NPI: <code>1234567890</code>, Doc Type: <code>Lab Results</code>,<br />
+                        Patient Name: <code>Nobody Here</code> (no matching claim),<br />
+                        Service Date: <code>10/15/2025</code>.
+                    </li>
+                    <li class="mb-2">Upload any file.</li>
+                    <li>
+                        &rarr; <span class="badge bg-warning text-dark">MatchFailed</span>.
+                        Payer searched NPI + patient name + service date (±7 days) — no match.
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white fw-semibold d-flex justify-content-between">
+                Failure — NPI not in registry
+                <span class="badge bg-white text-danger">ValidationFailed</span>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        <a href="/Provider/DirectSubmit">Provider &rarr; Direct Submit</a> &rarr; Upload File tab.
+                    </li>
+                    <li class="mb-2">
+                        NPI: <code>0000000000</code>, Doc Type: <code>Lab Results</code>,<br />
+                        Patient Name: <code>John Smith</code>, Service Date: <code>10/15/2025</code>.
+                    </li>
+                    <li class="mb-2">Upload any file.</li>
+                    <li>
+                        &rarr; <span class="badge bg-danger">ValidationFailed</span>.<br />
+                        <span class="small text-muted">Error: "Provider NPI 0000000000 was not found in the NPI registry."</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* ──────────────────────────────────────────────────────────────────────── *@
+@*  Pre-seeded outcomes reference                                            *@
+@* ──────────────────────────────────────────────────────────────────────── *@
+
+<h2 class="h4 fw-bold mb-3">Pre-Seeded Attachment Outcomes</h2>
+<p class="text-muted mb-3">
+    These records are created automatically on deploy and cover every status without any manual steps.
+    Find them in <a href="/Payer/Attachments">All Attachments</a>.
+</p>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Workflow</th>
+                <th>Patient</th>
+                <th>Document</th>
+                <th>Status</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody class="small">
+            <tr>
+                <td>1 — Solicited</td>
+                <td>John Smith</td>
+                <td>Lab Results</td>
+                <td><span class="badge bg-success">Accepted</span></td>
+                <td>Matched to CLM-2025-0001</td>
+            </tr>
+            <tr>
+                <td>2 — Clearinghouse</td>
+                <td>Maria Garcia</td>
+                <td>Office Visit Notes</td>
+                <td><span class="badge bg-success">Accepted</span></td>
+                <td>Matched to CLM-2025-0002, duplicate warning</td>
+            </tr>
+            <tr>
+                <td>3 — Direct</td>
+                <td>James Wilson</td>
+                <td>Radiology Report</td>
+                <td><span class="badge bg-warning text-dark">MatchFailed</span></td>
+                <td>NPI 5551234567 valid, but no claim matches</td>
+            </tr>
+            <tr>
+                <td>3 — Direct</td>
+                <td>Richard Torres</td>
+                <td>Consultation Note</td>
+                <td><span class="badge bg-danger">ValidationFailed</span></td>
+                <td>C-CDA patient name mismatch (spine consult for Patricia Moore submitted as Richard Torres)</td>
+            </tr>
+            <tr>
+                <td>2 — Clearinghouse</td>
+                <td>Robert Johnson</td>
+                <td>Operative Report</td>
+                <td><span class="badge bg-secondary">Rejected</span></td>
+                <td>Accepted then manually rejected by payer — demonstrates full audit trail</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
